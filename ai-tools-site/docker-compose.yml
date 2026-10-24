@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    container_name: ai-tools-site
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
