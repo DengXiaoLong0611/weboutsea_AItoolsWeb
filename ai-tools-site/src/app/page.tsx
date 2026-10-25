@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import ToolDirectory from "@/components/tool-directory";
 import {
   contentByLocale,
   siteConfig,
@@ -24,12 +27,17 @@ const stageColorClass: Record<ToolStage, { showcase: string; minimal: string }> 
   },
 };
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
   const [locale, setLocale] = useState<Locale>("zh");
-  const [mode, setMode] = useState<ThemeMode>("showcase");
+  const [mode, setMode] = useState<ThemeMode>(searchParams.get("mode") === "minimal" ? "minimal" : "showcase");
   const isMinimal = mode === "minimal";
 
   const copy = useMemo(() => contentByLocale[locale], [locale]);
+
+  if (isMinimal) {
+    return <ToolDirectory locale={locale} copy={copy} onLocaleChange={setLocale} onShowcase={() => setMode("showcase")} />;
+  }
 
   return (
     <div
@@ -109,30 +117,14 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setMode("showcase")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  mode === "showcase"
-                    ? isMinimal
-                      ? "bg-white text-slate-900"
-                      : "bg-sky-400 text-[#03111d]"
-                    : isMinimal
-                      ? "text-slate-500"
-                      : "text-slate-300"
-                }`}
+                className="rounded-full bg-sky-400 px-3 py-1 text-xs font-medium text-[#03111d]"
               >
                 Showcase
               </button>
               <button
                 type="button"
                 onClick={() => setMode("minimal")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  mode === "minimal"
-                    ? isMinimal
-                      ? "bg-white text-slate-900"
-                      : "bg-sky-400 text-[#03111d]"
-                    : isMinimal
-                      ? "text-slate-500"
-                      : "text-slate-300"
-                }`}
+                className="rounded-full px-3 py-1 text-xs font-medium text-slate-300"
               >
                 Minimal
               </button>
@@ -274,6 +266,11 @@ export default function Home() {
                 >
                   {tool.summary}
                 </p>
+                {tool.href && (
+                  <Link href={tool.href} className="mt-4 inline-flex rounded-full bg-sky-400 px-4 py-2 text-sm font-medium text-[#03111d] hover:bg-sky-300">
+                    {locale === "zh" ? "打开工具 →" : "Open tool →"}
+                  </Link>
+                )}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {tool.tags.map((tag) => (
                     <span
@@ -439,4 +436,8 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+export default function Home() {
+  return <Suspense fallback={<main className="min-h-screen bg-white p-8 text-slate-900">正在载入工具站…</main>}><HomeContent /></Suspense>;
 }

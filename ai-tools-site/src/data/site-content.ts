@@ -3,6 +3,9 @@ export type ThemeMode = "showcase" | "minimal";
 export type ToolStage = "live" | "shipping" | "in_build";
 
 export type ToolItem = {
+  id: string;
+  category: "image" | "content" | "growth" | "support";
+  href?: string;
   name: string;
   stage: ToolStage;
   value: string;
@@ -22,7 +25,7 @@ export type OfferItem = {
   detail: string;
 };
 
-type LocaleContent = {
+export type LocaleContent = {
   brand: string;
   nav: { tools: string; cases: string; offers: string; contact: string };
   headline: string;
@@ -99,6 +102,18 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
     },
     tools: [
       {
+        id: "pet-photo",
+        category: "image",
+        href: "/tools/pet-photo",
+        name: "Pet Photos · 宠物照片",
+        stage: "live",
+        value: "Turn a pet photo into a personalized print, right in your browser.",
+        summary: "Upload a photo, adjust the crop, add a name and export a PNG. No AI generation or cloud upload.",
+        tags: ["Photos", "Print layouts", "PNG export"],
+      },
+      {
+        id: "landing-generator",
+        category: "growth",
         name: "Landing Generator",
         stage: "live",
         value: "Auto-builds multilingual tool pages with SEO blocks and CTA wiring.",
@@ -107,6 +122,8 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["SEO", "Localization", "Lead Gen"],
       },
       {
+        id: "short-form-engine",
+        category: "content",
         name: "Short-Form Engine",
         stage: "live",
         value:
@@ -116,6 +133,8 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["Content Ops", "Video", "Distribution"],
       },
       {
+        id: "offer-optimizer",
+        category: "growth",
         name: "Offer Optimizer",
         stage: "shipping",
         value:
@@ -125,6 +144,8 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["CRO", "Copy", "Experimentation"],
       },
       {
+        id: "support-bot",
+        category: "support",
         name: "Support Knowledge Bot",
         stage: "in_build",
         value: "Converts docs and tickets into instant customer-facing answers.",
@@ -219,6 +240,18 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
     },
     tools: [
       {
+        id: "pet-photo",
+        category: "image",
+        href: "/tools/pet-photo",
+        name: "宠物照片",
+        stage: "live",
+        value: "把喜欢的宠物照片，做成可以保存、打印的专属纪念照。",
+        summary: "上传照片、调整裁切、添加名字，选择相框版式并导出 PNG。当前为本地照片编辑，不含 AI 生成。",
+        tags: ["照片编辑", "相框排版", "PNG 导出"],
+      },
+      {
+        id: "landing-generator",
+        category: "growth",
         name: "落地页生成器",
         stage: "live",
         value: "自动生成多语言工具页，内置 SEO 模块和 CTA 线索入口。",
@@ -226,6 +259,8 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["SEO", "本地化", "线索转化"],
       },
       {
+        id: "short-form-engine",
+        category: "content",
         name: "短内容引擎",
         stage: "live",
         value: "把一篇长内容拆解为短视频脚本、短帖和分发文案。",
@@ -233,6 +268,8 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["内容运营", "视频", "分发"],
       },
       {
+        id: "offer-optimizer",
+        category: "growth",
         name: "报价优化器",
         stage: "shipping",
         value: "针对不同意图人群测试标题角度和 CTA 文案组合。",
@@ -240,6 +277,8 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["转化优化", "文案", "实验"],
       },
       {
+        id: "support-bot",
+        category: "support",
         name: "客服知识机器人",
         stage: "in_build",
         value: "把文档和工单沉淀为客户可直接查询的问答能力。",

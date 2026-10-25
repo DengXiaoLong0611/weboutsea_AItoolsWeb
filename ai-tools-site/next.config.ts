@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  async rewrites() {
+    return [
+      { source: "/tools/pet-photo", destination: "/tools/pet-photo/index.html" },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {
