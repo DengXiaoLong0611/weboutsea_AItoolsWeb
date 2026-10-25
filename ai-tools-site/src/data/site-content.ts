@@ -102,6 +102,16 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
     },
     tools: [
       {
+        id: "hand-drawn-photo",
+        category: "image",
+        href: "/tools/hand-drawn-photo/",
+        name: "AI Hand-drawn Photos",
+        stage: "in_build",
+        value: "Explore warm oil-pastel portraits of pets and their people.",
+        summary: "Browse 9 photo-to-art references. Generation is not connected yet.",
+        tags: ["Illustration", "Photo comparison", "Preview"],
+      },
+      {
         id: "pet-photo",
         category: "image",
         href: "/tools/pet-photo",
@@ -239,6 +249,16 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
       in_build: "开发中",
     },
     tools: [
+      {
+        id: "hand-drawn-photo",
+        category: "image",
+        href: "/tools/hand-drawn-photo/",
+        name: "AI 手绘照片生成",
+        stage: "in_build",
+        value: "把宠物和人与宠物合照，变成温暖的油画棒风格。",
+        summary: "先浏览 9 组照片与手绘对比案例；生成接口尚未接通。",
+        tags: ["手绘", "照片对比", "案例预览"],
+      },
       {
         id: "pet-photo",
         category: "image",

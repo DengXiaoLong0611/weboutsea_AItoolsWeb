@@ -73,6 +73,7 @@ function HomeContent() {
             </a>
           </nav>
           <div className="flex flex-wrap items-center gap-2">
+            <Link href="/account" className="rounded-full border border-slate-500 px-3 py-2 text-sm">{locale === "zh" ? "登录 / 账户" : "Sign in / Account"}</Link>
             <div
               className={`flex rounded-full border p-1 ${
                 isMinimal ? "border-slate-200 bg-slate-100" : "border-[#223454] bg-[#101a2e]"

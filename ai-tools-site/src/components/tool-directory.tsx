@@ -28,10 +28,10 @@ export default function ToolDirectory({ locale, copy, onLocaleChange, onShowcase
   const needle = query.trim().toLocaleLowerCase();
   const filtered = copy.tools.filter(tool =>
     (category === "all" || tool.category === category) &&
-    (!availableOnly || Boolean(tool.href)) &&
+    (!availableOnly || Boolean(tool.href && tool.stage === "live")) &&
     (!needle || [tool.name, tool.value, tool.summary, ...tool.tags].join(" ").toLocaleLowerCase().includes(needle))
   );
-  const readyCount = copy.tools.filter(tool => tool.href).length;
+  const readyCount = copy.tools.filter(tool => tool.href && tool.stage === "live").length;
 
   return (
     <div className="directory">
@@ -72,13 +72,14 @@ export default function ToolDirectory({ locale, copy, onLocaleChange, onShowcase
             <div className="directory-sectionbar"><h2>{categories.find(item => item.id === category)?.label}<span>{filtered.length}</span></h2><label className="directory-checkbox"><input type="checkbox" checked={availableOnly} onChange={event => setAvailableOnly(event.target.checked)} />{zh ? "只看可使用" : "Available only"}</label></div>
             <div className="directory-grid" aria-live="polite" aria-atomic="false">
               {filtered.map(tool => <article className={`directory-tool ${tool.href ? "directory-tool-ready" : ""}`} key={tool.id}>
+                {tool.id === "hand-drawn-photo" && <Link href={tool.href!} tabIndex={-1} aria-hidden="true" className="directory-tool-photo"><Image src="/tools/pet-photo/example/cleaned/03.webp" alt="" width={1254} height={1254} /><span>{zh ? "手绘风格参考" : "Illustration reference"}</span></Link>}
                 {tool.id === "pet-photo" && <Link href={tool.href!} tabIndex={-1} aria-hidden="true" className="directory-tool-photo"><Image src="/tools/pet-photo/assets/demo/preview.webp" alt="" width={600} height={400} /><span>{zh ? "相框效果概念图" : "Frame styling concept"}</span></Link>}
                 <div className="directory-tool-content">
-                  <div className="directory-tool-meta"><span>{categories.find(item => item.id === tool.category)?.label}</span><span className={tool.href ? "directory-status-ready" : "directory-status-pending"}>{tool.href ? (zh ? "可使用" : "Available") : (zh ? "待接入" : "Not connected")}</span></div>
+                  <div className="directory-tool-meta"><span>{categories.find(item => item.id === tool.category)?.label}</span><span className={tool.href ? "directory-status-ready" : "directory-status-pending"}>{tool.id === "hand-drawn-photo" ? (zh ? "案例预览" : "Preview") : tool.href ? (zh ? "可使用" : "Available") : (zh ? "待接入" : "Not connected")}</span></div>
                   <h3>{tool.href ? <Link href={tool.href}>{tool.name}</Link> : tool.name}</h3>
                   <p>{tool.value}</p>
                   <div className="directory-tool-tags">{tool.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
-                  <div className="directory-tool-bottom">{tool.href ? <><span>{zh ? "本地编辑 · 暂无 AI" : "Local editor · No AI yet"}</span><Link href={tool.href}>{zh ? "打开工具" : "Open tool"}<span aria-hidden="true"> →</span></Link></> : <span>{zh ? "介绍模板，尚无可用入口" : "Showcase template; no working tool yet"}</span>}</div>
+                  <div className="directory-tool-bottom">{tool.href ? <><span>{tool.id === "hand-drawn-photo" ? (zh ? "生成接口待接入" : "Generation not connected") : (zh ? "本地编辑 · 暂无 AI" : "Local editor · No AI yet")}</span><Link href={tool.href}>{tool.id === "hand-drawn-photo" ? (zh ? "查看案例" : "View examples") : (zh ? "打开工具" : "Open tool")}<span aria-hidden="true"> →</span></Link></> : <span>{zh ? "介绍模板，尚无可用入口" : "Showcase template; no working tool yet"}</span>}</div>
                 </div>
               </article>)}
             </div>
@@ -86,7 +87,7 @@ export default function ToolDirectory({ locale, copy, onLocaleChange, onShowcase
           </section>
 
           <aside className="directory-sidebar">
-            <section><h2>{zh ? "现在可以试试" : "Ready to try"}</h2><Link className="directory-sidebar-tool" href="/tools/pet-photo"><strong>{zh ? "宠物照片" : "Pet Photos"}</strong><span>{zh ? "照片 → 排版 → PNG" : "Photo → Layout → PNG"}</span><span className="directory-text-link">{zh ? "制作一张纪念照 →" : "Make a keepsake →"}</span></Link><p>{zh ? "当前有 " : "Currently "}{readyCount}{zh ? " 个工具可直接使用，其余条目为待接入的介绍模板。" : " working tool. Other entries are templates awaiting integration."}</p></section>
+            <section><h2>{zh ? "现在可以试试" : "Ready to try"}</h2><Link className="directory-sidebar-tool" href="/tools/pet-photo"><strong>{zh ? "宠物照片" : "Pet Photos"}</strong><span>{zh ? "照片 → 排版 → PNG" : "Photo → Layout → PNG"}</span><span className="directory-text-link">{zh ? "制作一张纪念照 →" : "Make a keepsake →"}</span></Link><p>{zh ? "当前有 " : "Currently "}{readyCount}{zh ? " 个工具可直接使用；AI 手绘照片可浏览案例，其余条目待接入。" : " working tool(s). AI Hand-drawn Photos offers a reference preview; other tools await integration."}</p></section>
             <section><h2>{zh ? "使用小贴士" : "Good to know"}</h2><ul><li>{zh ? "无需注册，打开即可编辑。" : "No account needed."}</li><li>{zh ? "上传照片只在浏览器内处理。" : "Uploaded photos stay in your browser."}</li><li>{zh ? "下载后记得保存原始照片。" : "Keep your original photo after exporting."}</li></ul></section>
             <section><h2>{zh ? "一起完善工具站" : "Help shape the toolkit"}</h2><p>{zh ? "有想用的功能，或者遇到了问题？欢迎发邮件告诉我。" : "Have an idea or run into a problem? Send me a note."}</p><a className="directory-email" href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a></section>
           </aside>
