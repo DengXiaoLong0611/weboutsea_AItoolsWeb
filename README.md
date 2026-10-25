@@ -50,7 +50,7 @@ git push
 
 ## Vercel 部署准备
 
-用户提到的 “Vessel” 尚待确认是否指 Vercel。以下仅为 Vercel 操作说明，其他平台需按其实际文档配置。
+已确认使用 Vercel，采用 GitHub 仓库导入与持续部署流程。
 
 1. 上传 GitHub 后，在 Vercel 中导入对应仓库。
 2. **Root Directory 设为 `ai-tools-site`**，框架选择 Next.js。
