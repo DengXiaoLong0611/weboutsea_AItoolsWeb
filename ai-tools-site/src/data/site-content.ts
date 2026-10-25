@@ -48,7 +48,7 @@ type LocaleContent = {
 };
 
 export const siteConfig = {
-  contactEmail: "hello@aiglobaltoolkit.com",
+  contactEmail: "382592406@qq.com",
   copyright: "AI Global Toolkit",
   copyrightYear: "2026",
 };
