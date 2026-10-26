@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "test:smoke": "node tests/auth-smoke.mjs"
+    "test:smoke": "node tests/auth-smoke.mjs",
+    "pet-photo:test": "node --experimental-strip-types scripts/test-pet-photo.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

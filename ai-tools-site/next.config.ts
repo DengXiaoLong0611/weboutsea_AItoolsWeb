@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       { source: "/tools/pet-photo", destination: "/tools/pet-photo/index.html" },
+      { source: "/tools/hand-drawn-photo", destination: "/tools/hand-drawn-photo/index.html" },
     ];
   },
   turbopack: {

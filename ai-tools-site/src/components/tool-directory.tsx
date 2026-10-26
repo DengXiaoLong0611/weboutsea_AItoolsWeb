@@ -3,15 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import LocaleSwitcher from "@/components/locale-switcher";
 import { siteConfig, type Locale, type LocaleContent, type ToolItem } from "@/data/site-content";
 import "./tool-directory.css";
 
 type Category = "all" | ToolItem["category"];
 
-export default function ToolDirectory({ locale, copy, onLocaleChange, onShowcase }: {
+export default function ToolDirectory({ locale, copy, query: urlQuery, onShowcase }: {
   locale: Locale;
   copy: LocaleContent;
-  onLocaleChange: (locale: Locale) => void;
+  query: string;
   onShowcase: () => void;
 }) {
   const zh = locale === "zh";
@@ -37,13 +38,10 @@ export default function ToolDirectory({ locale, copy, onLocaleChange, onShowcase
     <div className="directory">
       <header className="directory-header">
         <div className="directory-width directory-topbar">
-          <Link href="/?mode=minimal" className="directory-brand">{copy.brand}<span>{zh ? "工具目录" : "Tool directory"}</span></Link>
+          <Link href={`/${locale}?mode=minimal`} className="directory-brand">{copy.brand}<span>{zh ? "工具目录" : "Tool directory"}</span></Link>
           <div className="directory-switches">
             <Link href="/account" className="rounded-full border border-slate-500 px-3 py-2 text-sm">{locale === "zh" ? "登录 / 账户" : "Sign in / Account"}</Link>
-            <div role="group" aria-label={zh ? "语言" : "Language"}>
-              <button type="button" aria-pressed={zh} onClick={() => onLocaleChange("zh")}>中文</button>
-              <button type="button" aria-pressed={!zh} onClick={() => onLocaleChange("en")}>English</button>
-            </div>
+            <LocaleSwitcher locale={locale} mode="minimal" query={urlQuery} />
             <div role="group" aria-label={zh ? "布局" : "Layout"}>
               <button type="button" onClick={onShowcase}>Showcase</button>
               <button type="button" aria-pressed="true">Minimal</button>

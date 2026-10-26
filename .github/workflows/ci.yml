@@ -21,5 +21,6 @@ jobs:
           cache: npm
           cache-dependency-path: ai-tools-site/package-lock.json
       - run: npm ci
+      - run: npm test
       - run: npm run lint
       - run: npm run build
