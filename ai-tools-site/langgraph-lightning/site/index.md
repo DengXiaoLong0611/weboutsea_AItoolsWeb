@@ -22,12 +22,11 @@ features:
 
 ## Course outline
 
-- **Module 0 — Getting started:** quick examples, Python essentials, and LangGraph basics
-- **Module 1 — Core concepts:** simple graphs, chains, routers, agents, memory, and deployment
-- **Module 2 — State and conversations:** schemas, reducers, multiple schemas, message trimming, summaries, and external memory
-- **Module 3 — Human control and debugging:** breakpoints, state editing, streaming interruptions, and time travel
-- **Module 4 — Advanced graph patterns:** parallelization, subgraphs, map-reduce, and a research assistant
-
+- **[Module 0 — Getting started](/module-0/0.0-LangGraph):** quick examples, Python essentials, and LangGraph basics
+- **[Module 1 — Core concepts](/module-1/1.1-simple-graph):** simple graphs, chains, routers, agents, memory, and deployment
+- **[Module 2 — State and conversations](/module-2/2.1-state-schema):** schemas, reducers, multiple schemas, message trimming, summaries, and external memory
+- **[Module 3 — Human control and debugging](/module-3/breakpoints):** breakpoints, state editing, streaming interruptions, and time travel
+- **[Module 4 — Advanced graph patterns](/module-4/4.1-parallelization):** parallelization, subgraphs, map-reduce, and a research assistant
 - **[Module 5 — Long-term memory](/module-5/5.1-memory-store):** stores, profiles, collections, and a memory agent
 - **[Module 6 — Deployment](/module-6/6.1-creating-deployment):** server setup, SDK connections, assistants, and double texting
 

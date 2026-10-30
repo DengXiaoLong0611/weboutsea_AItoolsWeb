@@ -22,12 +22,11 @@ features:
 
 ## 课程目录
 
-- **Module 0 — 快速入门：** LangGraph 快速案例、Python 基础与 LangGraph 基础
-- **Module 1 — 核心概念：** 简单图、Chain、Router、Agent、记忆与部署
-- **Module 2 — 状态与对话：** 状态模式、Reducers、多模式、消息裁剪、摘要与外部记忆
-- **Module 3 — 人机协作与调试：** 断点、状态编辑、流式中断与时间旅行
-- **Module 4 — 高级图模式：** 并行、子图、Map-Reduce 与研究助手
-
+- **[Module 0 — 快速入门](/zh/module-0/0.0-LangGraph-快速案例)：** LangGraph 快速案例、Python 基础与 LangGraph 基础
+- **[Module 1 — 核心概念](/zh/module-1/1.1-simple-graph-详细解读)：** 简单图、Chain、Router、Agent、记忆与部署
+- **[Module 2 — 状态与对话](/zh/module-2/2.1-state-schema-详细解读)：** 状态模式、Reducers、多模式、消息裁剪、摘要与外部记忆
+- **[Module 3 — 人机协作与调试](/zh/module-3/breakpoints-详细解读)：** 断点、状态编辑、流式中断与时间旅行
+- **[Module 4 — 高级图模式](/zh/module-4/4.1-parallelization-详细解读)：** 并行、子图、Map-Reduce 与研究助手
 - **[Module 5 — 长期记忆](/zh/module-5/5.1-长期记忆存储)：** Store、用户画像、记忆集合与记忆 Agent
 - **[Module 6 — 服务部署](/zh/module-6/6.1-创建部署)：** 创建部署、SDK 连接、Assistant 配置与连续消息处理
 
