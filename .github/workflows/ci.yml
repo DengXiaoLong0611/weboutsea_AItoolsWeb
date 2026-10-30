@@ -17,9 +17,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: ai-tools-site/.nvmrc
           cache: npm
           cache-dependency-path: ai-tools-site/package-lock.json
+      - run: npm install --global npm@11.19.1
       - run: npm ci
       - run: npm test
       - run: npm run lint

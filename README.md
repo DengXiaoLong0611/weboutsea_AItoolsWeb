@@ -1,6 +1,6 @@
 # AI 工具网站
 
-面向 AI 出海业务的工具、案例与服务展示站。当前包含双语展示首页、工具目录、浏览器本地照片排版工具、手绘案例预览、Supabase 身份认证，以及管理员专用 API 与提示词收藏页。百炼图像编辑调用模块与本地测试脚本已实现，但尚未接入网页生成按钮；没有支付、订单、额度或生成任务后台。
+面向 AI 出海业务的工具、案例与服务展示站。当前包含双语展示首页、工具目录、浏览器本地照片排版工具、手绘案例预览、Supabase 身份认证，以及管理员专用 API 与提示词收藏页。新增 DeepSeek 单模型流式聊天界面及服务端代理（已完成真实上游调用，登录后网页全流程待验收）。百炼图像编辑调用模块与本地测试脚本已实现，但尚未接入网页生成按钮；没有支付、订单、额度或生成任务后台。
 
 ## 项目结构
 
@@ -34,6 +34,7 @@ npm run dev
 | 工具目录 | `/en?mode=minimal`、`/zh?mode=minimal` | 搜索、分类与可使用工具筛选 |
 | 宠物照片 | `/tools/pet-photo` | 本地上传、裁剪、名字与相框排版、打印尺寸、PNG 导出；照片仅在浏览器处理，刷新后不保存 |
 | AI 手绘照片 | `/tools/hand-drawn-photo/` | 手绘参考案例预览；不提供在线上传或生成 |
+| AI 聊天 · DeepSeek | `/en/tools/ai-chat`、`/zh/tools/ai-chat` | 双语连续聊天、流式回复、停止/重试/复制；需登录并配置服务端密钥；真实上游流式与上下文已验证 |
 | 私人收藏库 | `/admin/api-library` | 登录后核验管理员邮箱白名单，展示提示词与 API 服务链接 |
 | 百炼图像编辑 | 本地 `npm run pet-photo:test` | 服务端调用模块与测试脚本已实现，尚未接入网页 |
 
@@ -105,3 +106,13 @@ git push
 ## 身份认证
 
 已增加注册、登录、账户、退出及密码重置页面。本地已填写 Supabase 项目 URL、公开密钥及站点地址；此前接入记录确认认证设置接口可用，但尚未完成真实邮件注册、登录与密码重置的全流程验收。Vercel 环境变量、远端回调、邮件模板与 SMTP 的最终状态仍需核验，详见 [Supabase 登录配置](docs/Supabase登录配置.md)。未配置时首页仍可使用，账户服务显示暂未开放。当前认证不会自动限制工具访问或实现计费。
+
+## DeepSeek 聊天
+
+配置和验收见 [DeepSeek聊天配置](docs/DeepSeek聊天配置.md)。密钥仅配置在 `ai-tools-site/.env.local` 或部署环境中。当前无支付及持久化额度，基础限流不跨实例；已完成两次简短真实上游生成，登录后网页全流程尚待验收。
+
+2026-10-27 DeepSeek 聊天：23 项单元测试、lint、生产构建、双语 HTTP 冒烟和 Chrome 桌面/手机模拟聊天验证通过。随后已验证真实 DeepSeek 密钥、流式回复和连续上下文；登录后网页全流程尚待验收。
+
+### LangGraph bilingual learning site
+
+The LangGraph Lightning learning guide is integrated into the AI tool site at `/learn/langgraph/` (English) and `/learn/langgraph/zh/` (Chinese). The pinned upstream snapshot, attribution and build instructions are maintained in `ai-tools-site/langgraph-lightning/`.

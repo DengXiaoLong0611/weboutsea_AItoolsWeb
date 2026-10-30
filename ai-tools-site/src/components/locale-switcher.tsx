@@ -8,8 +8,7 @@ export default function LocaleSwitcher({ locale, mode, query: search }: { locale
     document.cookie = `${localeCookie}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
   }, [locale]);
   const query = new URLSearchParams(search);
-  if (mode === "minimal") query.set("mode", "minimal");
-  else query.delete("mode");
+  query.set("mode", mode);
   const suffix = query.size ? `?${query}` : "";
   return <nav aria-label={locale === "zh" ? "语言" : "Language"} className="flex gap-2 rounded-full border border-slate-500 p-1 text-sm">
     {(["en", "zh"] as const).map(language => <a

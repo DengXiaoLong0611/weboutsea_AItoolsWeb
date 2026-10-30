@@ -8,3 +8,15 @@ node_modules/
 *.pem
 *.key
 *.tsbuildinfo
+
+# Local environments, caches and migration artifacts
+.next-local/
+.next-backup-*/
+.venv/
+__pycache__/
+*.pyc
+._*
+**/*-冲突-*
+output/
+.workbuddy/
+.superpowers/

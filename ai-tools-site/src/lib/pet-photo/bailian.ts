@@ -2,6 +2,9 @@
 import { Buffer } from 'node:buffer';
 
 export type BailianConfig = { apiKey: string; baseUrl: string; model: string };
+// An explicit provider rejection is safe to refund. Connection failures,
+// timeouts and invalid responses may follow a charged generation.
+export class BailianRejectedError extends Error {}
 type EditInput = { images: string[]; prompt: string };
 type ApiResponse = {
   code?: string;
@@ -75,7 +78,11 @@ export async function editPetPhoto(input: EditInput, config: BailianConfig = get
     const hint = /balance|quota|arrear/i.test(code) ? '请检查百炼余额或额度。'
       : /apikey|auth|accessdenied/i.test(code) || response.status === 401 || response.status === 403 ? '请检查密钥、地域及模型权限。'
       : response.status === 429 ? '请求受到限流或额度限制，请查看控制台。' : '请查看控制台调用记录。';
-    throw new Error(`百炼调用失败（HTTP ${response.status}，${code}）。${hint}未自动重试。`);
+    const message = `百炼调用失败（HTTP ${response.status}，${code}）。${hint}未自动重试。`;
+    if ((response.status >= 400 && response.status < 500 && response.status !== 408) || (response.ok && data.code)) {
+      throw new BailianRejectedError(message);
+    }
+    throw new Error(message);
   }
   const choices = data.output?.choices;
   const images = Array.isArray(choices) ? choices.flatMap(choice => Array.isArray(choice.message?.content) ? choice.message.content.flatMap(item => typeof item.image === 'string' ? [item.image] : []) : []) : [];

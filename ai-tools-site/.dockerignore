@@ -5,3 +5,5 @@ npm-debug.log
 .gitignore
 .DS_Store
 README.md
+.drawing-trials
+.env*

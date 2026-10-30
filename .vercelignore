@@ -1,0 +1,12 @@
+# Keep local planning notes and generated outputs out of production uploads.
+/.superpowers/
+/docs/
+/output/
+/.github/
+/README.md
+/DESIGN.md
+/PRODUCT.md
+/ai-tools-site/.superpowers/
+/ai-tools-site/output/
+/ai-tools-site/README.md
+/ai-tools-site/AGENTS.md

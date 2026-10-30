@@ -102,13 +102,44 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
     },
     tools: [
       {
+        id: "ai-chat",
+        category: "content",
+        href: "/en/tools/ai-chat",
+        name: "AI Chat · DeepSeek",
+        stage: "in_build",
+        value: "Think, write and explore with a conversational AI assistant.",
+        summary: "Streaming text chat with DeepSeek. Sign-in and server API configuration required.",
+        tags: ["Chat", "Writing", "DeepSeek"],
+      },
+
+      {
+        id: "langgraph-learning",
+        category: "content",
+        href: "/learn/langgraph/",
+        name: "LangGraph Lightning · Learning Guide",
+        stage: "live",
+        value: "Learn LangGraph through practical, chapter-based lessons.",
+        summary: "Bilingual community learning site based on the LangGraph Lightning repository; English landing page with the original Chinese lessons.",
+        tags: ["LangGraph", "AI agents", "Tutorial"],
+      },
+      {
+        id: "langgraph-learning",
+        category: "content",
+        href: "/learn/langgraph/zh/",
+        name: "LangGraph 光速上手",
+        stage: "live",
+        value: "通过分章节的实战教程学习 LangGraph。",
+        summary: "基于 LangGraph Lightning 仓库整理的双语社区学习站，中文页面保留可读的上游 Markdown 原文。",
+        tags: ["LangGraph", "AI Agent", "教程"],
+      },
+      {
         id: "hand-drawn-photo",
         category: "image",
         href: "/tools/hand-drawn-photo/",
         name: "AI Hand-drawn Photos",
         stage: "in_build",
         value: "Explore warm oil-pastel portraits of pets and their people.",
-        summary: "Browse 9 photo-to-art references. Generation is not connected yet.",
+        summary: "Try two illustrations without an account. Sign-in and purchase are required afterward; payments are coming soon.",
         tags: ["Illustration", "Photo comparison", "Preview"],
       },
       {
@@ -250,13 +281,35 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
     },
     tools: [
       {
+        id: "ai-chat",
+        category: "content",
+        href: "/zh/tools/ai-chat",
+        name: "AI 聊天 · DeepSeek",
+        stage: "in_build",
+        value: "随时提问、写作和探索想法，和 AI 连续对话。",
+        summary: "DeepSeek 流式文字聊天，需登录并配置服务端 API 密钥。",
+        tags: ["聊天", "写作", "DeepSeek"],
+      },
+
+      {
+        id: "langgraph-learning",
+        category: "content",
+        href: "/learn/langgraph/zh/",
+        name: "LangGraph 光速上手",
+        stage: "live",
+        value: "通过分章节的实战教程学习 LangGraph。",
+        summary: "基于 LangGraph Lightning 仓库整理的双语社区学习站，中文页面保留可读的上游 Markdown 原文。",
+        tags: ["LangGraph", "AI Agent", "教程"],
+      },
+
+      {
         id: "hand-drawn-photo",
         category: "image",
         href: "/tools/hand-drawn-photo/",
         name: "AI 手绘照片生成",
         stage: "in_build",
         value: "把宠物和人与宠物合照，变成温暖的油画棒风格。",
-        summary: "先浏览 9 组照片与手绘对比案例；生成接口尚未接通。",
+        summary: "免登录试用 2 次，选择三种画风生成手绘；继续使用需登录并购买（支付待开放）。",
         tags: ["手绘", "照片对比", "案例预览"],
       },
       {

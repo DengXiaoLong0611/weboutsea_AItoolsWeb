@@ -5,22 +5,16 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { getBailianConfig, editPetPhoto } from '../src/lib/pet-photo/bailian.ts';
+import { drawingStyles as styles, drawingPrompt } from '../src/lib/pet-photo/styles.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { values } = parseArgs({ options: {
   run: { type: 'boolean', default: false },
   help: { type: 'boolean', default: false },
   image: { type: 'string', default: 'public/tools/pet-photo/assets/demo/蛋蛋原照-抱玩偶.jpg' },
-  reference: { type: 'string', default: 'public/tools/pet-photo/example/3.png' },
   style: { type: 'string', default: 'all' },
 } });
 
-const styles = [
-  { id: '1', name: '蜡笔原景', prompt: '使用明显的蜡笔和油画棒颗粒、不规则深色轮廓与叠色，简化原照背景，保留场景关系。' },
-  { id: '2', name: '细腻彩铅', prompt: '以细腻彩铅线条结合蜡笔铺色，保留毛发细节和纸纹，轻度简化原照背景，优先保持宠物辨识度。' },
-  { id: '3', name: '蜡笔留白', prompt: '使用明显的蜡笔颗粒、不规则深色轮廓与纸纹；保留主体和抱着的玩偶，背景替换为温暖米白画纸并适当留白。' },
-];
-const basePrompt = '图1是需要改绘的原始照片，是宠物身份、毛色、花纹、姿势和物品关系的唯一依据。图2仅用于参考蜡笔手绘笔触，不要复制其中的人物、动物、文字、水印或社交界面。将图1绘制为可爱的手绘插画，保留宠物眼睛颜色、脸型、姿势及现有配饰；保留现有物体之间的关系，不增加人物或动物。呈现真实画纸颗粒与自然笔触，避免平滑矢量、3D与照片滤镜感。仅输出一幅纯手绘图，不含文字、水印、拼图或原照缩略图；原照对比由网页另行排版。';
 
 async function imageData(path) {
   const mime = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' }[extname(path).toLowerCase()];
@@ -47,7 +41,7 @@ async function downloadImage(url) {
 
 async function main() {
   if (values.help) {
-    console.log('用法：npm run pet-photo:test -- [--run] [--style 1|2|3|all] [--image 原照路径] [--reference 画风参考路径]\n默认仅预览，不联网、不扣费。--run 才实际生成并计费。');
+    console.log('用法：npm run pet-photo:test -- [--run] [--style 1|2|3|all] [--image 原照路径]\n默认仅预览，不联网、不扣费。--run 才实际生成并计费。');
     return;
   }
   for (const name of ['.env.local', '.env']) {
@@ -57,10 +51,9 @@ async function main() {
   const jobs = values.style === 'all' ? styles : styles.filter(s => s.id === values.style);
   if (!jobs.length) throw new Error('--style 只能为 1、2、3 或 all。');
   const source = resolve(root, values.image);
-  const reference = resolve(root, values.reference);
-  const images = await Promise.all([imageData(source), imageData(reference)]);
+  const images = await Promise.all([imageData(source)]);
   const model = process.env.DASHSCOPE_IMAGE_MODEL?.trim() || 'qwen-image-2.1-pro';
-  console.log(`${values.run ? '实际生成（会调用付费 API）' : '仅预览，不联网、不扣费'}\n模型：${model}\n原照：${source}\n参考：${reference}\n组别：${jobs.map(j => j.name).join('、')}`);
+  console.log(`${values.run ? '实际生成（会调用付费 API）' : '仅预览，不联网、不扣费'}\n模型：${model}\n原照：${source}\n组别：${jobs.map(j => j.name).join('、')}`);
   if (!values.run) {
     console.log(`百炼密钥：${process.env.DASHSCOPE_API_KEY?.trim() ? '已配置' : '未配置'}；API 地址：${process.env.DASHSCOPE_BASE_URL?.trim() ? '已填写（执行时校验）' : '未配置'}\n确认后加 --run 执行；仅测试一张可加 --style 1。`);
     return;
@@ -72,7 +65,7 @@ async function main() {
   console.log(`输出目录：${output}`);
   const records = [];
   for (const job of jobs) {
-    const prompt = `${basePrompt}\n${job.prompt}`;
+    const prompt = drawingPrompt(job.id);
     await writeFile(resolve(output, `${job.id}-${job.name}-提示词.txt`), prompt);
     console.log(`正在生成：${job.name}……`);
     const started = Date.now();

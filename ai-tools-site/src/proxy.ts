@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { authConfig } from "@/lib/supabase/config";
 import { chooseLocale, localeCookie } from "@/lib/i18n";
+import { supabaseFetch } from '@/lib/supabase/transport';
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname === "/") {
     const locale = chooseLocale(request.cookies.get(localeCookie)?.value, request.headers.get("accept-language"));
@@ -17,6 +18,7 @@ export async function proxy(request: NextRequest) {
   const config = authConfig();
   if (!config) return response;
   const supabase = createServerClient(config.url, config.key, {
+    global: { fetch: supabaseFetch },
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll(values) {

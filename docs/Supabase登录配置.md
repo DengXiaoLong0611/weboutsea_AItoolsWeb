@@ -22,7 +22,7 @@ Vercel 的项目 Settings → Environment Variables 中也配置这三个值，�
 
 ## 3. 认证设置
 
-Authentication 中开启 Email 注册并保留 Confirm email。密码最短长度设为 12；应用同时限制最长 128 字符。
+Authentication 中开启 Email 注册。按 2026-10-27 用户决定，关闭 Email provider 下的 **Confirm email**，使新用户无需验证邮箱即可注册登录；这等价于自动确认开启。此远端设置尚需项目所有者在控制台保存，不能把代码适配视为远端开关已修改。密码最短长度设为 12；应用同时限制最长 128 字符。
 
 URL Configuration：
 
@@ -88,3 +88,16 @@ Supabase 内置邮件仅适合测试，存在收件人和速率限制，不能�
 已在 Chrome 确认登录，组织显示 Free，项目引用为 `porkwrbitbjgeroyaosq`。观察到网站部署域名为 `https://weboutsea-a-itools-web.vercel.app`。本地环境文件已准备项目 URL，公开密钥仍待读取。控制台在刷新后持续空白，浏览器标签页读取超时；尚未保存远端认证设置、邮件模板、SMTP 或 Vercel 环境变量，不能视作认证已启用。
 
 公开密钥已于 2026-10-25 写入被 Git 忽略的本地 `.env.local`，未写入文档。真实 Auth settings 接口返回 HTTP 200，确认邮箱认证开启、注册允许、邮箱确认开启。Node 直连曾返回 ECONNRESET；沿用本机 HTTP 代理 127.0.0.1:7890 并启用 `--use-env-proxy` 后同一接口返回 200。本机启动服务时须让 Node 继承此代理配置（NO_PROXY 包含 localhost,127.0.0.1），云端不要复制本地代理地址。此结果不代表邮件投递、注册登录全流程或生产环境配置已完成。
+
+## 自动确认邮箱适配（2026-10-27）
+
+用户选择减少注册步骤，要求自动确认邮箱。网页已适配 Supabase 注册成功返回 session 的情况，直接进入 `/account`，不再错误提示等待验证邮件；如果后台仍启用验证且返回空 session，保留验证邮件提示。找回密码仍依赖邮件。
+
+项目所有者在 Supabase 控制台进入 Authentication → Sign In / Providers → Email，关闭 **Confirm email** 后保存。官方说明：[General configuration](https://supabase.com/docs/guides/auth/general-configuration)。当前环境没有 Management API access token，无法代为保存项目级开关；本次没有改变云端设置或创建真实测试账户。
+
+
+## 本地网络与密码长度（2026-10-29）
+
+网站注册与重置密码现允许至少 6 个字符；Supabase Authentication 的 Password security 最小长度也需设为 6，网站不能覆盖云端策略。当前项目已允许邮箱注册，并要求邮件验证。
+
+若 Windows 浏览器可连接而 Node 报 ECONNRESET，可在本机 `.env.local` 配置 `SUPABASE_PROXY_URL=http://127.0.0.1:7890`（按实际代理端口调整）。服务端 Supabase 请求和登录代理使用该配置；部署到可直连的服务器时留空。已验证通过本机代理访问 Auth settings 返回 HTTP 200，但不等于真实注册和验证邮件全流程已完成。

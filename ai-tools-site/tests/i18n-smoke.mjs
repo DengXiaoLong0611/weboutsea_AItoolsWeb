@@ -19,7 +19,7 @@ for (const [headers, expected] of [
 }
 
 for (const [locale, lang] of [['en', 'en'], ['zh', 'zh-CN']]) {
-  for (const suffix of ['', '?mode=minimal']) {
+  for (const suffix of ['', '?mode=minimal', '?mode=showcase']) {
     const response = await fetch(`${origin}/${locale}${suffix}`, {
       headers: { cookie: `site_locale=${locale === 'en' ? 'zh' : 'en'}`, 'accept-language': locale === 'en' ? 'zh' : 'en' },
       redirect: 'manual',
@@ -29,9 +29,10 @@ for (const [locale, lang] of [['en', 'en'], ['zh', 'zh-CN']]) {
     assert.match(html, new RegExp(`<html[^>]*lang="${lang}"`));
     assert.match(html, /hrefLang="en"|hreflang="en"/);
     assert.match(html, /hrefLang="zh-CN"|hreflang="zh-CN"/);
-    assert.ok(html.includes(`href="/en${suffix}"`));
-    assert.ok(html.includes(`href="/zh${suffix}"`));
-    if (suffix) assert.ok(html.includes(locale === 'en' ? 'Find a tool. Make something.' : '发现工具，直接开始。'));
+    const mode = suffix === '?mode=showcase' ? 'showcase' : 'minimal';
+    assert.ok(html.includes(`href="/en?mode=${mode}"`));
+    assert.ok(html.includes(`href="/zh?mode=${mode}"`));
+    if (mode === 'minimal') assert.ok(html.includes(locale === 'en' ? 'Find a tool. Make something.' : '发现工具，直接开始。'));
     console.log(`/${locale}${suffix}: content, HTML language and language links verified`);
   }
 }

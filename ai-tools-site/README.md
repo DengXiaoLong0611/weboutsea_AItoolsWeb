@@ -1,5 +1,7 @@
 # AI Tools Showcase Site (Next.js)
 
+开发前必读：[技术栈原理与开发指导](./技术栈原理与开发指导.md)。其中的 AI 生成等待反馈原则适用于整个工具栈及未来新增工具。
+
 一个面向 AI 出海项目的展示站与工具目录，已包含本地照片排版工具、手绘案例页、Supabase 身份认证和管理员收藏页，支持你持续新增：
 
 - 工具能力（Tools）
@@ -89,12 +91,12 @@ docker compose up -d --build
 
 - Showcase 保留深色展示风格；Minimal 为白底平铺工具目录，支持分类、搜索与可用工具筛选。直达：`/en?mode=minimal` 或 `/zh?mode=minimal`。
 - “宠物照片”入口：`/tools/pet-photo`，支持示例/本地照片、文字、相框版式、打印尺寸和 PNG 导出。网页尚未接入 AI 生成，上传照片只在浏览器中处理，刷新后不保存。
-- “AI 手绘照片”入口：`/tools/hand-drawn-photo/`，目前仅展示参考案例，不提供在线生成；案例不代表本站生成接口的实测结果。
+- “AI 手绘照片”入口：`/tools/hand-drawn-photo/`，已接入照片上传、三种画风生成和结果下载；免登录体验 1 次，登录后累计免费 2 次，之后显示购买提示（支付尚未接入）。共享额度需先完成 [手绘额度配置](../docs/手绘额度配置.md)。参考案例不代表本站生成接口的实测结果。
 - 目录组件与样式：`src/components/tool-directory.tsx`、`tool-directory.css`。
 - 工具内容：`public/tools/pet-photo/index.html`、`style.css`、`app.js`。素材复制自原宠物照片项目，原项目目录未修改；概念图和旧版操作视频均有明确说明。
 - 添加新工具：在 `src/data/site-content.ts` 两种语言的 tools 中增加相同 ID、分类和介绍；已有可用页面再填写 href，目录会自动显示入口。独立后端或较大的工具也可以单独部署，并填写其网址。
 - 以后接 AI 时，通过服务端 API 调用，密钥放在 Vercel 环境变量中，不能写进 public 文件。
-- 百炼服务端调用代码与本地三组手绘测试入口已准备好（尚未接网页按钮）：配置 `DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`DASHSCOPE_IMAGE_MODEL`；运行 `npm run pet-photo:test` 仅预览，加 `-- --run` 才实际生成。详见 [百炼宠物手绘配置](../docs/百炼宠物手绘配置.md)。未新增 SDK 依赖。
+- 百炼服务端调用代码与本地三组手绘测试入口已准备好（已接入手绘网页）：配置 `DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`DASHSCOPE_IMAGE_MODEL`；运行 `npm run pet-photo:test` 仅预览，加 `-- --run` 才实际生成。详见 [百炼宠物手绘配置](../docs/百炼宠物手绘配置.md)。未新增 SDK 依赖。
 - Vercel 的 Root Directory 使用 `ai-tools-site`，现有 GitHub 集成会随 main 更新自动部署。绑定自有域名时以 Vercel Domains 给出的 DNS 记录为准。
 
 ## 身份认证与私人收藏库
@@ -116,3 +118,7 @@ docker compose up -d --build
 `npm test` 包含认证规则和百炼模拟调用测试；`npm run test:smoke` 需要先启动生产服务并设置 `AUTH_TEST_URL`。模拟测试通过不代表真实邮件或 AI 服务已验证。
 
 本地未提交内容不等于线上已发布内容。上线前执行 `npm ci`、`npm test`、`npm run lint`、`npm run build`，并检查部署日志与实际页面；工具状态、案例数字和联系邮箱也应核实。
+
+## LangGraph learning site
+
+The bilingual LangGraph learning guide is served at `/learn/langgraph/` (English) and `/learn/langgraph/zh/` (Chinese). Its vendored upstream snapshot and source notice live in `langgraph-lightning/`; update content only from a reviewed upstream commit, preserve the MIT license and attribution, then rebuild with `npm run docs:langgraph:build`. The normal `npm run build` builds the guide before Next.js so Vercel publishes it with the tool site.

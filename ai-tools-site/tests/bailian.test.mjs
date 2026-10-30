@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { getBailianConfig, editPetPhoto } from '../src/lib/pet-photo/bailian.ts';
+import { getBailianConfig, editPetPhoto, BailianRejectedError } from '../src/lib/pet-photo/bailian.ts';
 
 const env = { DASHSCOPE_API_KEY: 'test-secret', DASHSCOPE_BASE_URL: 'https://workspace.cn-beijing.maas.aliyuncs.com/api/v1' };
 const input = { images: ['data:image/png;base64,aGVsbG8='], prompt: '保留毛色，改为蜡笔手绘' };
@@ -58,6 +58,14 @@ test('timeouts surface clearly without exposing request data', async () => {
   }), /超时/);
 });
 
+test('only explicit upstream rejection is safe to refund; timeouts and server errors are unknown', async () => {
+  await assert.rejects(editPetPhoto(input, getBailianConfig(env), async () => Response.json({ code: 'InvalidParameter' }, { status: 400 })), error => error instanceof BailianRejectedError);
+  for (const status of [408, 500, 502]) {
+    await assert.rejects(editPetPhoto(input, getBailianConfig(env), async () => Response.json({ code: 'InternalError' }, { status })), error => !(error instanceof BailianRejectedError));
+  }
+  await assert.rejects(editPetPhoto(input, getBailianConfig(env), async () => { throw new DOMException('timeout', 'TimeoutError'); }), error => !(error instanceof BailianRejectedError));
+});
+
 test('local command previews three jobs without needing credentials or sending requests', () => {
   const output = execFileSync(process.execPath, ['--experimental-strip-types', 'scripts/test-pet-photo.mjs'], {
     cwd: new URL('..', import.meta.url),
@@ -65,7 +73,7 @@ test('local command previews three jobs without needing credentials or sending r
     encoding: 'utf8',
   });
   assert.match(output, /仅预览/);
-  assert.match(output, /蜡笔原景/);
+  assert.match(output, /Q版油画棒/);
   assert.match(output, /细腻彩铅/);
   assert.match(output, /蜡笔留白/);
   assert.doesNotMatch(output, /data:image\/|Bearer /);

@@ -14,7 +14,7 @@ async function Content({ params, searchParams }: PageProps) {
     if (Array.isArray(value)) value.forEach(item => encoded.append(key, item));
     else if (value !== undefined) encoded.set(key, value);
   }
-  return <Home locale={locale} initialMode={query.mode === "minimal" ? "minimal" : "showcase"} query={encoded.toString()} />;
+  return <Home locale={locale} initialMode={query.mode === "showcase" ? "showcase" : "minimal"} query={encoded.toString()} />;
 }
 
 export default function Page(props: PageProps) {
