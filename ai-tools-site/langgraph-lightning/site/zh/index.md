@@ -28,4 +28,7 @@ features:
 - **Module 3 — 人机协作与调试：** 断点、状态编辑、流式中断与时间旅行
 - **Module 4 — 高级图模式：** 并行、子图、Map-Reduce 与研究助手
 
-中文教程正文保留上游仓库中可读取的 Markdown 内容。首版不包含仅以 Notebook 提供的 Module 5、6。详见[来源与译文说明](/SOURCE_NOTICE)。
+- **[Module 5 — 长期记忆](/zh/module-5/5.1-长期记忆存储)：** Store、用户画像、记忆集合与记忆 Agent
+- **[Module 6 — 服务部署](/zh/module-6/6.1-创建部署)：** 创建部署、SDK 连接、Assistant 配置与连续消息处理
+
+Module 0–4 保留上游可读取的中文 Markdown；Module 5、6 根据上游 Notebook 和 Python 实现重新整理为中英文章节，并保留原始代码单元。详见[来源与译文说明](/SOURCE_NOTICE)。

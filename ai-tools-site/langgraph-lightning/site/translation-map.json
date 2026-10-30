@@ -22,5 +22,13 @@
   "/module-4/4.1-parallelization": "/zh/module-4/4.1-parallelization-详细解读",
   "/module-4/4.2-sub-graph": "/zh/module-4/4.2-sub-graph-详细解读",
   "/module-4/4.3-map-reduce": "/zh/module-4/4.3-map-reduce-详细解读",
-  "/module-4/4.4-research-assistant": "/zh/module-4/4.4-research-assistant-详细解读"
+  "/module-4/4.4-research-assistant": "/zh/module-4/4.4-research-assistant-详细解读",
+  "/module-5/5.1-memory-store": "/zh/module-5/5.1-长期记忆存储",
+  "/module-5/5.2-memory-profile": "/zh/module-5/5.2-用户画像",
+  "/module-5/5.3-memory-collection": "/zh/module-5/5.3-记忆集合",
+  "/module-5/5.4-memory-agent": "/zh/module-5/5.4-记忆智能体",
+  "/module-6/6.1-creating-deployment": "/zh/module-6/6.1-创建部署",
+  "/module-6/6.2-connecting": "/zh/module-6/6.2-连接部署",
+  "/module-6/6.3-assistants": "/zh/module-6/6.3-助手配置",
+  "/module-6/6.4-double-texting": "/zh/module-6/6.4-连续消息处理"
 }

@@ -28,4 +28,7 @@ features:
 - **Module 3 — Human control and debugging:** breakpoints, state editing, streaming interruptions, and time travel
 - **Module 4 — Advanced graph patterns:** parallelization, subgraphs, map-reduce, and a research assistant
 
-The English lessons are translated from the original Chinese Markdown. Code samples, commands, API identifiers, and file paths are preserved from the source. Review the [source and translation notice](/SOURCE_NOTICE) for attribution, license, and scope.
+- **[Module 5 — Long-term memory](/module-5/5.1-memory-store):** stores, profiles, collections, and a memory agent
+- **[Module 6 — Deployment](/module-6/6.1-creating-deployment):** server setup, SDK connections, assistants, and double texting
+
+The English lessons for Modules 0–4 are translated from the original Chinese Markdown. Code samples, commands, API identifiers, and file paths are preserved from the source. Modules 5–6 reorganize the upstream notebooks into paired Chinese and English lessons with original code cells. Review the [source and translation notice](/SOURCE_NOTICE) for attribution, license, and scope.

@@ -22,7 +22,7 @@ const enSidebar = Object.keys(map).reduce((acc, url) => {
   group.items.push({ text: title, link: url })
   return acc
 }, [] as Array<{text:string;collapsed:boolean;items:Array<{text:string;link:string}>}>)
-const zhSidebar = [0,1,2,3,4].map((n) => {
+const zhSidebar = [0,1,2,3,4,5,6].map((n) => {
   const dir = path.join(siteRoot, 'zh', `module-${n}`)
   const items = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).sort().map((file) => {
     const slug = file.slice(0, -3)
