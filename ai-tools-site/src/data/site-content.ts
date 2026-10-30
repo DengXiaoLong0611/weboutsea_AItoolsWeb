@@ -123,16 +123,6 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["LangGraph", "AI agents", "Tutorial"],
       },
       {
-        id: "langgraph-learning",
-        category: "content",
-        href: "/learn/langgraph/zh/",
-        name: "LangGraph 光速上手",
-        stage: "live",
-        value: "通过分章节的实战教程学习 LangGraph。",
-        summary: "基于 LangGraph Lightning 仓库整理的双语社区学习站，中文页面保留可读的上游 Markdown 原文。",
-        tags: ["LangGraph", "AI Agent", "教程"],
-      },
-      {
         id: "hand-drawn-photo",
         category: "image",
         href: "/tools/hand-drawn-photo/",
