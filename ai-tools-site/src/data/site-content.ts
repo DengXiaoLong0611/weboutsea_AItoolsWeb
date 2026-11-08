@@ -227,7 +227,7 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
     ],
   },
   zh: {
-    brand: "AI 出海工具站",
+    brand: "AI 工具站",
     nav: { tools: "工具", cases: "案例", offers: "服务", contact: "联系" },
     headline: "一次搭建，全球发布，用 AI 每周持续迭代。",
     subheading:
