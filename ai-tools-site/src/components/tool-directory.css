@@ -10,10 +10,6 @@
 .directory-brand{font-size:23px;font-weight:700;letter-spacing:-.025em;display:flex;gap:15px;align-items:center}
 .directory-brand span{font-size:13px;font-weight:400;letter-spacing:0;border-left:1px solid #d8dde1;padding-left:15px;color:#636b74}
 .directory-switches{display:flex;gap:18px;flex-wrap:wrap}
-.directory-switches [role=group]{display:flex;gap:3px}
-.directory-switches button{padding:5px 10px;border:1px solid transparent;background:transparent;color:#5a626b;border-radius:4px;font-size:12px}
-.directory-switches button:hover{background:#f3f4f5;color:#20252a}
-.directory-switches button[aria-pressed=true]{border-color:#d6dce0;color:#24282d;font-weight:700;background:#f4f5f6}
 .directory-nav{border-top:1px solid #edf0f1}
 .directory-nav-inner{display:flex;align-items:stretch;gap:4px;overflow-x:auto}
 .directory-nav button,.directory-contact{background:transparent;white-space:nowrap;border:0;border-bottom:3px solid transparent;padding:13px 22px 10px;color:#515961;font-weight:600}

@@ -9,11 +9,10 @@ import "./tool-directory.css";
 
 type Category = "all" | ToolItem["category"];
 
-export default function ToolDirectory({ locale, copy, query: urlQuery, onShowcase }: {
+export default function ToolDirectory({ locale, copy, query: urlQuery }: {
   locale: Locale;
   copy: LocaleContent;
   query: string;
-  onShowcase: () => void;
 }) {
   const zh = locale === "zh";
   const [category, setCategory] = useState<Category>("all");
@@ -38,14 +37,10 @@ export default function ToolDirectory({ locale, copy, query: urlQuery, onShowcas
     <div className="directory">
       <header className="directory-header">
         <div className="directory-width directory-topbar">
-          <Link href={`/${locale}?mode=minimal`} className="directory-brand">{copy.brand}<span>{zh ? "工具目录" : "Tool directory"}</span></Link>
+          <Link href={`/${locale}`} className="directory-brand">{copy.brand}<span>{zh ? "工具目录" : "Tool directory"}</span></Link>
           <div className="directory-switches">
             <Link href="/account" className="rounded-full border border-slate-500 px-3 py-2 text-sm">{locale === "zh" ? "登录 / 账户" : "Sign in / Account"}</Link>
-            <LocaleSwitcher locale={locale} mode="minimal" query={urlQuery} />
-            <div role="group" aria-label={zh ? "布局" : "Layout"}>
-              <button type="button" onClick={onShowcase}>Showcase</button>
-              <button type="button" aria-pressed="true">Minimal</button>
-            </div>
+            <LocaleSwitcher locale={locale} query={urlQuery} />
           </div>
         </div>
         <nav className="directory-nav" aria-label={zh ? "工具分类" : "Tool categories"}>

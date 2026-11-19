@@ -1,5 +1,4 @@
 export type Locale = "zh" | "en";
-export type ThemeMode = "showcase" | "minimal";
 export type ToolStage = "live" | "shipping" | "in_build";
 
 export type ToolItem = {

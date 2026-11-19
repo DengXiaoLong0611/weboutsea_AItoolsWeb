@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 import { localeCookie, type SiteLocale } from "@/lib/i18n";
 
-export default function LocaleSwitcher({ locale, mode, query: search }: { locale: SiteLocale; mode: "minimal" | "showcase"; query: string }) {
+export default function LocaleSwitcher({ locale, query: search }: { locale: SiteLocale; query: string }) {
   useEffect(() => {
     document.cookie = `${localeCookie}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
   }, [locale]);
   const query = new URLSearchParams(search);
-  query.set("mode", mode);
+  query.delete("mode");
   const suffix = query.size ? `?${query}` : "";
   return <nav aria-label={locale === "zh" ? "语言" : "Language"} className="flex gap-2 rounded-full border border-slate-500 p-1 text-sm">
     {(["en", "zh"] as const).map(language => <a
