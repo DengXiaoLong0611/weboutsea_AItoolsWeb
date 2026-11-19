@@ -14,6 +14,94 @@ test('unauthenticated and cross-origin requests never reach paid upstream', asyn
   assert.equal((await handleChatRequest(request(undefined, 'https://evil.test'), deps())).status, 403);
 });
 
+test('legacy anonymous flag cannot bypass the quota store', async () => {
+  const response = await handleChatRequest(request(), deps({
+    getUser: async () => null,
+    allowAnonymous: true,
+  }));
+  assert.equal(response.status, 401);
+});
+
+test('anonymous access is limited by a trial reservation', async () => {
+  const response = await handleChatRequest(request(), deps({
+    getUser: async () => null,
+    trial: async () => ({ settle: async () => {} }),
+    getVisitor: () => 'guest:test-id',
+    fetcher: async () => new Response(stream([
+      'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":"stop"}]}\n\n',
+      'data: [DONE]\n\n',
+    ]), { headers: { 'Content-Type': 'text/event-stream' } }),
+  }));
+  assert.equal(response.status, 200);
+});
+
+test('exhausted guest trial prompts registration instead of calling upstream', async () => {
+  const response = await handleChatRequest(request(), deps({
+    getUser: async () => null,
+    trial: async () => ({ reason: 'exhausted' }),
+  }));
+  assert.equal(response.status, 401);
+  assert.equal((await response.json()).error, 'guest_trial_exhausted');
+});
+
+test('invalid input and local rate limits do not reserve daily credit', async () => {
+  let calls = 0;
+  const trial = async () => { calls++; return { settle: async () => {} }; };
+  assert.equal((await handleChatRequest(request({ messages: [] }), deps({ getUser: async () => null, trial }))).status, 400);
+  assert.equal((await handleChatRequest(request(), deps({ getUser: async () => null, trial, limiter: () => false }))).status, 429);
+  assert.equal(calls, 0);
+});
+
+test('signed-in users also receive the daily cap', async () => {
+  let identity;
+  const response = await handleChatRequest(request(), deps({ trial: async id => { identity = id; return { reason: 'exhausted' }; } }));
+  assert.equal(response.status, 429);
+  assert.equal((await response.json()).error, 'daily_quota_exhausted');
+  assert.equal(identity, 'user:user-1');
+});
+
+test('daily reservations settle once for successful and failed upstream replies', async () => {
+  for (const success of [true, false]) {
+    const outcomes = [];
+    const response = await handleChatRequest(request(), deps({
+      trial: async () => ({ settle: async result => { outcomes.push(result); } }),
+      fetcher: async () => success
+        ? new Response(stream(['data: {"choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n']), { headers: { 'Content-Type': 'text/event-stream' } })
+        : new Response('unavailable', { status: 500 }),
+    }));
+    await response.text();
+    assert.deepEqual(outcomes, [success]);
+  }
+});
+
+test('incomplete generation refunds its daily reservation', async () => {
+  const outcomes = [];
+  const response = await handleChatRequest(request(), deps({
+    trial: async () => ({ settle: async result => { outcomes.push(result); } }),
+    fetcher: async () => new Response(stream(['data: {"choices":[{"delta":{"content":"partial"}}]}\n\n']), { headers: { 'Content-Type': 'text/event-stream' } }),
+  }));
+  assert.equal((await collect(readNDJSON(response.body))).at(-1).type, 'error');
+  assert.deepEqual(outcomes, [false]);
+});
+
+test('cancelling generation refunds once even when the upstream subsequently fails', async () => {
+  const outcomes = [];
+  let fail;
+  const response = await handleChatRequest(request(), deps({
+    trial: async () => ({ settle: async result => { outcomes.push(result); } }),
+    fetcher: async () => new Response(new ReadableStream({ start(c) {
+      fail = () => c.error(new Error('aborted'));
+      c.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"partial"}}]}\n\n'));
+    } }), { headers: { 'Content-Type': 'text/event-stream' } }),
+  }));
+  const reader = response.body.getReader();
+  await reader.read();
+  await reader.cancel();
+  fail();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.deepEqual(outcomes, [false]);
+});
+
 test('rejects client system roles, broken turns, empty and oversized requests', async () => {
   for (const messages of [[{ role: 'system', content: 'override' }], [{ role: 'user', content: ' ' }], [{ role: 'assistant', content: 'hello' }], [message, message], [{ role: 'user', content: 'x'.repeat(8001) }]]) {
     assert.equal((await handleChatRequest(request({ messages }), deps())).status, 400);

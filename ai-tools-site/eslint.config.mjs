@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     ".next-backup-*/**",
     "public/learn/langgraph/**",
     "langgraph-lightning/site/.vitepress/cache/**",
+    "**/.vitepress/.temp/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

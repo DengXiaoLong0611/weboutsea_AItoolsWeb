@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { readNDJSON } from "@/lib/chat/protocol";
 import type { Locale } from "@/data/site-content";
 import "./ai-chat.css";
+import "./chat-quota.css";
 
 type Message = { id: string; role: "user" | "assistant"; content: string; state?: "complete" | "stopped" | "failed" | "truncated" };
 const errors: Record<string, [string, string]> = {
   sign_in_required: ["Sign in to start chatting. After signing in, return to this tab and retry.", "请先登录，登录后回到此标签页重试即可。"],
+  guest_trial_exhausted: ["Today's 20 guest replies are used up. Sign in for your account allowance, or return tomorrow.", "今日游客免费 20 次已用完。注册或登录使用账号额度，或明天再来。"],
+  daily_quota_exhausted: ["Today's 20 free replies are used up. Your allowance resets at 00:00 UTC.", "今日免费 20 次已用完，将在 UTC 零点恢复。"],
+  trial_unavailable: ["Guest chat is temporarily unavailable. Please try again later.", "游客聊天暂时不可用，请稍后再试。"],
+  trial_busy: ["A reply is still being generated. Please wait and try again.", "上一条回复正在生成，请稍后再试。"],
   not_configured: ["Chat is not connected yet. The site owner needs to configure the DeepSeek API key.", "聊天服务尚未接通，请站点管理员配置 DeepSeek API 密钥。"],
   rate_limited: ["You’re sending messages too quickly. Please wait a minute.", "发送太频繁，请等待一分钟后重试。"],
   provider_busy: ["DeepSeek is busy. Please try again in a moment.", "DeepSeek 暂时繁忙，请稍后重试。"],
@@ -29,6 +34,13 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
   const [notice, setNotice] = useState("");
+  const [trialRemaining, setTrialRemaining] = useState<number | null>(null);
+  const [signedIn, setSignedIn] = useState(false);
+  const [resetsAt, setResetsAt] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+  const startedAt = useRef(0);
+  const trialDialog = useRef<HTMLDialogElement>(null);
+  const statusRequest = useRef<Promise<void> | null>(null);
   const active = useRef<AbortController | null>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
@@ -41,6 +53,37 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
 
   useEffect(() => () => { active.current?.abort(); if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
   useEffect(() => { if (nearBottom.current) bottom.current?.scrollIntoView({ behavior: "instant", block: "end" }); }, [messages, busy]);
+  const refreshQuota = useCallback(() => {
+    if (statusRequest.current) return statusRequest.current;
+    statusRequest.current = fetch("/api/chat", { cache: "no-store" })
+      .then(async response => {
+        if (!response.ok) throw new Error("trial_unavailable");
+        const data = await response.json();
+        if (!Number.isInteger(data.remaining) || typeof data.resetsAt !== "string") throw new Error("trial_unavailable");
+        setTrialRemaining(data.remaining);
+        setSignedIn(data.signedIn === true);
+        setResetsAt(data.resetsAt);
+      })
+      .finally(() => { statusRequest.current = null; });
+    return statusRequest.current;
+  }, []);
+  useEffect(() => {
+    if (!configured) return;
+    const refresh = () => { if (document.visibilityState === "visible" && !active.current) void refreshQuota().catch(() => {}); };
+    refresh();
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    const timer = setInterval(refresh, 30000);
+    return () => { clearInterval(timer); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, [configured, refreshQuota]);
+  useEffect(() => {
+    if (error === "guest_trial_exhausted" && !trialDialog.current?.open) trialDialog.current?.showModal();
+  }, [error]);
+  useEffect(() => {
+    if (!busy) return;
+    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt.current) / 1000)), 1000);
+    return () => clearInterval(timer);
+  }, [busy]);
 
   async function generate(history: Message[]) {
     if (active.current || !configured) return;
@@ -49,6 +92,8 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
     const id = crypto.randomUUID();
     setMessages([...history, { id, role: "assistant", content: "" }]);
     setBusy(true);
+    startedAt.current = Date.now();
+    setElapsed(0);
     setError("");
     setNotice("");
     nearBottom.current = true;
@@ -59,6 +104,9 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
       setMessages([...history, { id, role: "assistant", content: answer, state }]);
     };
     try {
+      // Establish the signed cookie before the first POST; share an in-flight status request.
+      await refreshQuota();
+      if (controller.signal.aborted) { update("stopped"); return; }
       const response = await fetch("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history.map(({ role, content }) => ({ role, content })) }),
@@ -92,6 +140,7 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
       if (active.current === controller) {
         active.current = null;
         setBusy(false);
+        void refreshQuota().catch(() => {});
         textarea.current?.focus();
       }
     }
@@ -139,6 +188,7 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
     <main className="chat-main">
       <header className="chat-header"><Link className="chat-mobile-back" href={`/${locale}?mode=minimal`} aria-label={t("Back to tools", "返回工具目录")}>←</Link><div><span className="chat-model-dot" />DeepSeek <span className="chat-header-tag">{t("Everyday assistant", "日常助手")}</span></div><button className="chat-mobile-new" onClick={newChat}>{t("New chat", "新建对话")} ＋</button><Link className="chat-header-language" href={`/${zh ? "en" : "zh"}/tools/ai-chat`}>{zh ? "EN" : "中文"}</Link></header>
       {!configured && <div className="chat-config" role="status">{t("Preview · Chat will be available once the DeepSeek API key is configured.", "界面预览 · 配置 DeepSeek API 密钥后即可开始聊天。")}</div>}
+      {configured && trialRemaining !== null && <div className="chat-config" role="status">{t(`${signedIn ? "Account" : "Guest"} · ${trialRemaining}/20 free replies left today.`, `${signedIn ? "账号" : "游客"} · 今日剩余免费回复 ${trialRemaining}/20 次。`)} {resetsAt && t(`Resets ${new Date(resetsAt).toLocaleString("en-US") } (local time).`, `恢复时间：${new Date(resetsAt).toLocaleString("zh-CN")}（本地时间）。`)}</div>}
       <div className="chat-scroll" onScroll={event => { const el = event.currentTarget; nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120; }}>
         {messages.length === 0 ? <section className="chat-welcome">
           <div className="chat-spark" aria-hidden="true">✳</div><div className="chat-eyebrow">{t("A SPACE TO THINK, WRITE & EXPLORE", "思考、写作与探索的空间")}</div>
@@ -156,7 +206,7 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
         <div ref={bottom} className="chat-bottom-anchor" />
       </div>
       <div className="chat-compose-area">
-        {error && <div className="chat-error" role="alert">{errors[error]?.[zh ? 1 : 0]}{error === "sign_in_required" && <> <a href="/auth/login" target="_blank" rel="noopener noreferrer">{t("Sign in ↗", "前往登录 ↗")}</a></>}</div>}
+        {error && <div className="chat-error" role="alert">{errors[error]?.[zh ? 1 : 0]}{(error === "sign_in_required" || error === "guest_trial_exhausted") && <> <a href="/auth/signup" target="_blank" rel="noopener noreferrer">{t("Create account / Sign in ↗", "注册或登录 ↗")}</a></>}</div>}
         {notice && <p className="chat-notice" role="status">{notice}</p>}
         {!busy && retryable && <div className="chat-recovery"><button onClick={() => void generate(messages.slice(0, -1))}>{t("Retry last message", "重试最后一条消息")}</button>{last.content.trim() && <button onClick={keepPartial}>{t("Continue with this reply", "保留此回复并继续")}</button>}</div>}
         {contextTooLong && !retryable && <p className="chat-notice">{t("This conversation has reached its context limit. Start a new chat to continue.", "对话已达到上下文上限，请新建对话继续。")}</p>}
@@ -165,8 +215,14 @@ export default function AIChat({ locale, configured }: { locale: Locale; configu
           <textarea ref={textarea} id="chat-input" value={draft} maxLength={8000} rows={3} placeholder={t("Ask anything, or try an idea above…", "问点什么，或者试试上面的灵感…")} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); submit(); } }} />
           <div className="chat-compose-bottom"><span><span className="chat-model-dot" />DeepSeek <span className="chat-keyboard-hint">· {t("Shift + Enter for a new line", "Shift + Enter 换行")}</span></span><div><span className="chat-char-count">{draft.length > 6000 ? `${draft.length}/8000` : ""}</span>{busy ? <button type="button" className="chat-send chat-stop" onClick={stop} aria-label={t("Stop generating", "停止生成")}>■</button> : <button type="submit" className="chat-send" disabled={!draft.trim() || !configured || contextTooLong || !!retryable} aria-label={t("Send message", "发送消息")}>↑</button>}</div></div>
         </form>
-        <p className="chat-disclaimer" aria-live="polite">{busy ? t("Generating a reply…", "正在生成回复…") : t("Sign-in required. Messages are sent to DeepSeek. AI can make mistakes.", "需登录使用。消息会发送给 DeepSeek，AI 回答可能有误。")}</p>
+        <p className="chat-disclaimer" role="status">{busy ? <><span className="chat-wait-spinner" aria-hidden="true" />{t("Generating a reply…", "正在生成回复…")} <span aria-hidden="true">{elapsed}s</span>{elapsed >= 30 && t(" Taking longer than usual. You can stop and retry later.", " 等待较久，可停止并稍后重试。")}</> : t("Messages are sent to DeepSeek. AI can make mistakes.", "消息会发送给 DeepSeek，AI 回答可能有误。")}</p>
       </div>
     </main>
+    <dialog className="chat-trial-dialog" ref={trialDialog} aria-labelledby="chat-trial-title">
+      <h2 id="chat-trial-title">{t("Keep the conversation going", "继续你的对话")}</h2>
+      <p>{t("Today's 20 guest replies are used up. Create an account or sign in to use your account's 20 daily replies. Your conversation stays in this tab.", "今日游客免费 20 次已用完。注册或登录后可使用账号每天 20 次额度，当前对话会保留在此标签页。")}</p>
+      <p>{t("Or return after 00:00 UTC for a new guest allowance.", "也可以等待 UTC 零点恢复游客额度。")}</p>
+      <div><a href="/auth/signup" target="_blank" rel="noopener noreferrer">{t("Create account", "注册账号")}</a><a href="/auth/login" target="_blank" rel="noopener noreferrer">{t("Sign in", "登录")}</a><button type="button" onClick={() => trialDialog.current?.close()}>{t("Later", "稍后再说")}</button></div>
+    </dialog>
   </div>;
 }

@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/tools/pet-photo", destination: "/tools/pet-photo/index.html" },
       { source: "/tools/hand-drawn-photo", destination: "/tools/hand-drawn-photo/index.html" },
+      { source: "/en/tools/hand-drawn-photo", destination: "/tools/hand-drawn-photo/index.html" },
+      { source: "/zh/tools/hand-drawn-photo", destination: "/tools/hand-drawn-photo/index.html" },
       { source: "/learn/langgraph", destination: "/learn/langgraph/index.html" },
       { source: "/learn/langgraph/zh", destination: "/learn/langgraph/zh/index.html" },
       { source: "/learn/langgraph/:path*", destination: "/learn/langgraph/:path*.html" },

@@ -1,0 +1,10 @@
+.chat-wait-spinner{display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;margin-right:7px;animation:chat-quota-spin .8s linear infinite}
+@keyframes chat-quota-spin{to{transform:rotate(360deg)}}
+.chat-trial-dialog{max-width:440px;width:calc(100% - 36px);border:1px solid #d8dfd8;border-radius:18px;padding:28px;color:#252c2a;background:#fbfcf9;box-shadow:0 20px 80px #0003}
+.chat-trial-dialog::backdrop{background:#15251d66}
+.chat-trial-dialog h2{font-size:23px;margin:0 0 16px}
+.chat-trial-dialog p{font-size:14px;line-height:1.7;margin:12px 0}
+.chat-trial-dialog>div{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:20px}
+.chat-trial-dialog a,.chat-trial-dialog button{padding:9px 13px;border-radius:8px;border:1px solid #cbd5ca;font:inherit;font-size:14px;cursor:pointer}
+.chat-trial-dialog a:first-child{background:#2d6047;color:white}
+@media(prefers-reduced-motion:reduce){.chat-wait-spinner{animation:none}}

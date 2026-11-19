@@ -2,11 +2,16 @@ import { readSSE, type ChatEvent } from "./protocol.ts";
 
 type Message = { role: "user" | "assistant"; content: string };
 type Limiter = (user: string) => boolean;
+export type ChatTrialReservation =
+  | { reason?: undefined; settle: (success: boolean) => Promise<void> }
+  | { reason: 'busy' | 'exhausted' | 'unavailable' | 'rate_limited'; settle?: undefined };
 type Dependencies = {
   apiKey?: string;
   model?: string;
   siteOrigin?: string;
   getUser: () => Promise<string | null>;
+  trial?: (visitor: string) => Promise<ChatTrialReservation>;
+  getVisitor?: (request: Request) => string;
   limiter: Limiter;
   fetcher?: typeof fetch;
 };
@@ -69,11 +74,30 @@ export async function handleChatRequest(request: Request, deps: Dependencies): P
   if (!origin || (origin !== ownOrigin && origin !== deps.siteOrigin)) return error("forbidden", 403);
   let user: string | null;
   try { user = await deps.getUser(); } catch { return error("auth_unavailable", 503); }
-  if (!user) return error("sign_in_required", 401);
   if (!deps.apiKey?.trim()) return error("not_configured", 503);
-  if (!deps.limiter(user)) return error("rate_limited", 429);
+  const signedIn = !!user;
+  if (!user && !deps.trial) return error("sign_in_required", 401);
+  const identity = user ? `user:${user}` : `guest:${deps.getVisitor?.(request) ?? "anonymous"}`;
+  if (!deps.limiter(identity)) return error("rate_limited", 429);
   let messages: Message[];
-  try { messages = await input(request); } catch (e) { return error(e instanceof Error && e.message === "too_large" ? "too_large" : "invalid_request", e instanceof Error && e.message === "too_large" ? 413 : 400); }
+  try { messages = await input(request); } catch (e) {
+    return error(e instanceof Error && e.message === "too_large" ? "too_large" : "invalid_request", e instanceof Error && e.message === "too_large" ? 413 : 400);
+  }
+  if (request.signal.aborted) return error("timeout", 408);
+  let trial: ChatTrialReservation | undefined;
+  if (deps.trial) {
+    try { trial = await deps.trial(identity); } catch { return error("trial_unavailable", 503); }
+    if (trial.reason === "busy") return error("trial_busy", 429);
+    if (trial.reason === "exhausted") return error(signedIn ? "daily_quota_exhausted" : "guest_trial_exhausted", signedIn ? 429 : 401);
+    if (trial.reason === "unavailable") return error("trial_unavailable", 503);
+    if (trial.reason === "rate_limited") return error("rate_limited", 429);
+  }
+  // Cancellation and stream completion may race. The first outcome owns settlement.
+  let settlement: Promise<void> | undefined;
+  const settle = (success: boolean) => settlement ??= (trial?.settle?.(success) ?? Promise.resolve()).catch(() => {
+    // The database lease reclaims an unsettled reservation after a process/storage failure.
+    console.error("Chat quota settlement failed");
+  });
 
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -92,11 +116,13 @@ export async function handleChatRequest(request: Request, deps: Dependencies): P
     });
   } catch {
     cleanup();
+    await settle(false);
     return error(controller.signal.aborted ? "timeout" : "provider_unavailable", controller.signal.aborted ? 504 : 502);
   }
   if (!upstream.ok || !upstream.body || !upstream.headers.get("content-type")?.includes("text/event-stream")) {
     await upstream.body?.cancel().catch(() => {});
     cleanup();
+    await settle(false);
     const code = upstream.status === 402 ? "provider_balance" : upstream.status === 429 ? "provider_busy" : upstream.status === 401 ? "provider_auth" : "provider_unavailable";
     return error(code, upstream.status === 429 ? 429 : 502);
   }
@@ -122,8 +148,11 @@ export async function handleChatRequest(request: Request, deps: Dependencies): P
           if (choice?.finish_reason) finish = choice.finish_reason;
         }
         if (!complete || !content.trim() || (finish !== "stop" && finish !== "length")) throw new Error("incomplete_stream");
+        if (cancelled || controller.signal.aborted) throw new Error("cancelled");
+        await settle(true);
         emit({ type: "done", truncated: finish === "length" });
       } catch {
+        await settle(false);
         emit({ type: "error", code: controller.signal.aborted ? "timeout" : "stream_failed" });
       } finally {
         cleanup();
@@ -131,7 +160,12 @@ export async function handleChatRequest(request: Request, deps: Dependencies): P
         if (!cancelled) output.close();
       }
     },
-    cancel() { cancelled = true; controller.abort(); cleanup(); },
+    async cancel() {
+      cancelled = true;
+      controller.abort();
+      cleanup();
+      await settle(false);
+    },
   });
   return new Response(stream, { headers: { ...headers, "Content-Type": "application/x-ndjson; charset=utf-8", "X-Accel-Buffering": "no" } });
 }

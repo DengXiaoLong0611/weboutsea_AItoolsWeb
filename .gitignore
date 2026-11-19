@@ -20,3 +20,6 @@ __pycache__/
 output/
 .workbuddy/
 .superpowers/
+
+.vercel
+.env*
