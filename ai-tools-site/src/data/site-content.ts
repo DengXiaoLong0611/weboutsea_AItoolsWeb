@@ -132,6 +132,16 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         tags: ["Illustration", "Photo comparison", "Preview"],
       },
       {
+        id: "pet-portrait",
+        category: "image",
+        href: "/en/tools/pet-portrait",
+        name: "AI Pet Portraits",
+        stage: "in_build",
+        value: "Turn two separate photos into a portrait of you and your pet.",
+        summary: "See three watermarked looks as a guest. Buy the portrait or collection you want to download.",
+        tags: ["AI portrait", "Pet keepsake", "Free previews"],
+      },
+      {
         id: "pet-photo",
         category: "image",
         href: "/tools/pet-photo",
@@ -300,6 +310,16 @@ export const contentByLocale: Record<Locale, LocaleContent> = {
         value: "把宠物和人与宠物合照，变成温暖的油画棒风格。",
         summary: "免登录试用 2 次，选择三种画风生成手绘；继续使用需登录并购买（支付待开放）。",
         tags: ["手绘", "照片对比", "案例预览"],
+      },
+      {
+        id: "pet-portrait",
+        category: "image",
+        href: "/zh/tools/pet-portrait",
+        name: "AI 宠物合照",
+        stage: "in_build",
+        value: "用两张独立照片，生成你和宠物同框的纪念照。",
+        summary: "无需登录即可预览三个带水印场景，可选购单张或整套高清图。",
+        tags: ["AI 合照", "宠物纪念", "免费预览"],
       },
       {
         id: "pet-photo",
