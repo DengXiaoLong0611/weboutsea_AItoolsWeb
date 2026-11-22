@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { confirmationDestination, validSiteUrl } from '../src/lib/supabase/policy.ts';
 test('confirmation only accepts signup and recovery purposes', () => {
-  assert.equal(confirmationDestination('signup'), '/account');
+  assert.equal(confirmationDestination('signup'), '/');
   assert.equal(confirmationDestination('recovery'), '/auth/update-password');
   for (const value of ['invite', 'email_change', '//evil.com', null, '']) assert.equal(confirmationDestination(value), null);
 });

@@ -74,3 +74,33 @@
 @media(max-width:760px){.directory-width{width:calc(100% - 32px)}.directory-topbar{align-items:start;flex-direction:column;gap:14px;padding-block:18px}.directory-brand{font-size:21px}.directory-switches{gap:12px}.directory-nav button{padding-inline:14px}.directory-contact{padding-inline:14px}.directory-intro{align-items:stretch;flex-direction:column;gap:20px}.directory-intro h1{font-size:26px}.directory-search{width:100%}.directory-body{grid-template-columns:1fr}.directory-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.directory-sidebar section{margin:0}.directory-sidebar section:last-child{grid-column:1/-1}.directory-main{padding-top:24px}.directory-tool-photo img{height:210px}.directory-tool-content{padding:14px}}
 @media(max-width:420px){.directory-grid{grid-template-columns:1fr}.directory-tool-ready{grid-column:auto}.directory-sidebar{grid-template-columns:1fr}.directory-tool-photo img{height:210px}.directory-footer>div{flex-direction:column;gap:4px}}
 @media(prefers-reduced-motion:reduce){.directory-tool-photo img{transition:none}}
+
+.account-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.directory-notes {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0 1rem;
+  font-weight: 600;
+}
+
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: #bae6fd;
+  color: #0f172a;
+  font-weight: 600;
+}

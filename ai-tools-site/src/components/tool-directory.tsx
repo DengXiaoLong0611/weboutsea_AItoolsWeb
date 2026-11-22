@@ -9,10 +9,11 @@ import "./tool-directory.css";
 
 type Category = "all" | ToolItem["category"];
 
-export default function ToolDirectory({ locale, copy, query: urlQuery }: {
+export default function ToolDirectory({ locale, copy, query: urlQuery, initial }: {
   locale: Locale;
   copy: LocaleContent;
   query: string;
+  initial?: string;
 }) {
   const zh = locale === "zh";
   const [category, setCategory] = useState<Category>("all");
@@ -39,13 +40,17 @@ export default function ToolDirectory({ locale, copy, query: urlQuery }: {
         <div className="directory-width directory-topbar">
           <Link href={`/${locale}`} className="directory-brand">{copy.brand}<span>{zh ? "工具目录" : "Tool directory"}</span></Link>
           <div className="directory-switches">
-            <Link href="/account" className="rounded-full border border-slate-500 px-3 py-2 text-sm">{locale === "zh" ? "登录 / 账户" : "Sign in / Account"}</Link>
+            {initial ? <Link href="/account" className="account-pill" aria-label={zh ? "我的账户，已登录" : "My account, signed in"}>
+              <span className="account-avatar" aria-hidden="true">{initial}</span>
+              <span>{zh ? "我的账户" : "My account"}</span>
+            </Link> : <Link href="/auth/login" className="account-pill">{zh ? "登录 / 注册" : "Sign in / Register"}</Link>}
             <LocaleSwitcher locale={locale} query={urlQuery} />
           </div>
         </div>
         <nav className="directory-nav" aria-label={zh ? "工具分类" : "Tool categories"}>
           <div className="directory-width directory-nav-inner">
             {categories.map(item => <button type="button" key={item.id} aria-pressed={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</button>)}
+            <Link className="directory-notes" href="/notes">{zh ? "动态" : "Notes"}</Link>
             <a className="directory-contact" href={`mailto:${siteConfig.contactEmail}`}>{zh ? "联系与建议" : "Contact"}</a>
           </div>
         </nav>
@@ -73,7 +78,7 @@ export default function ToolDirectory({ locale, copy, query: urlQuery }: {
                   <h3>{tool.href ? <Link href={tool.href}>{tool.name}</Link> : tool.name}</h3>
                   <p>{tool.value}</p>
                   <div className="directory-tool-tags">{tool.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
-                  <div className="directory-tool-bottom">{tool.href ? <><span>{tool.id === "ai-chat" ? (zh ? "流式聊天 · 需登录" : "Streaming chat · Sign-in required") : tool.id === "hand-drawn-photo" ? (zh ? "生成接口待接入" : "Generation not connected") : tool.id === "pet-portrait" ? (zh ? "AI 生成 · 免登录预览" : "AI generation · Guest previews") : (zh ? "本地编辑 · 暂无 AI" : "Local editor · No AI yet")}</span><Link href={tool.href}>{tool.id === "hand-drawn-photo" ? (zh ? "查看案例" : "View examples") : (zh ? "打开工具" : "Open tool")}<span aria-hidden="true"> →</span></Link></> : <span>{zh ? "介绍模板，尚无可用入口" : "Showcase template; no working tool yet"}</span>}</div>
+                  <div className="directory-tool-bottom">{tool.href ? <><span>{tool.id === "ai-chat" ? (zh ? "流式聊天 · 游客可试用" : "Streaming chat · Guest trial") : tool.id === "hand-drawn-photo" ? (zh ? "游客可生成 2 次" : "Two guest generations") : tool.id === "pet-portrait" ? (zh ? "AI 生成 · 免登录预览" : "AI generation · Guest previews") : (zh ? "本地编辑 · 暂无 AI" : "Local editor · No AI yet")}</span><Link href={tool.href}>{tool.id === "hand-drawn-photo" ? (zh ? "开始手绘" : "Try illustration") : (zh ? "打开工具" : "Open tool")}<span aria-hidden="true"> →</span></Link></> : <span>{zh ? "介绍模板，尚无可用入口" : "Showcase template; no working tool yet"}</span>}</div>
                 </div>
               </article>)}
             </div>
@@ -81,8 +86,9 @@ export default function ToolDirectory({ locale, copy, query: urlQuery }: {
           </section>
 
           <aside className="directory-sidebar">
-            <section><h2>{zh ? "现在可以试试" : "Ready to try"}</h2><Link className="directory-sidebar-tool" href="/tools/pet-photo"><strong>{zh ? "宠物照片" : "Pet Photos"}</strong><span>{zh ? "照片 → 排版 → PNG" : "Photo → Layout → PNG"}</span><span className="directory-text-link">{zh ? "制作一张纪念照 →" : "Make a keepsake →"}</span></Link><p>{zh ? "当前有 " : "Currently "}{readyCount}{zh ? " 个工具可直接使用；AI 聊天需登录，手绘照片可免登录试用 2 次，其余条目待接入。" : " working tool(s). AI Chat requires sign-in; Hand-drawn Photos includes two guest trials; other tools await integration."}</p></section>
-            <section><h2>{zh ? "使用小贴士" : "Good to know"}</h2><ul><li>{zh ? "照片排版无需注册；AI 聊天需登录，手绘可免费试用 2 次。" : "Photo layouts need no account; AI Chat requires sign-in; illustration offers two guest trials."}</li><li>{zh ? "照片排版在本地处理；聊天发送至 DeepSeek，手绘照片发送至百炼。" : "Photo layouts stay local; chats go to DeepSeek and illustration photos go to Bailian."}</li><li>{zh ? "下载后记得保存原始照片。" : "Keep your original photo after exporting."}</li></ul></section>
+            <section><h2>{zh ? "个人收藏库" : "Private collection"}</h2><Link className="directory-text-link" href="/admin/api-library">{zh ? "打开收藏库 →" : "Open collection →"}</Link></section>
+            <section><h2>{zh ? "现在可以试试" : "Ready to try"}</h2><Link className="directory-sidebar-tool" href="/tools/pet-photo"><strong>{zh ? "宠物照片" : "Pet Photos"}</strong><span>{zh ? "照片 → 排版 → PNG" : "Photo → Layout → PNG"}</span><span className="directory-text-link">{zh ? "制作一张纪念照 →" : "Make a keepsake →"}</span></Link><p>{zh ? "当前有 " : "Currently "}{readyCount}{zh ? " 个工具可直接使用；AI 聊天支持游客试用，手绘照片可免登录试用 2 次，其余条目待接入。" : " working tool(s). AI Chat has a guest allowance; Hand-drawn Photos includes two guest trials; other tools await integration."}</p></section>
+            <section><h2>{zh ? "使用小贴士" : "Good to know"}</h2><ul><li>{zh ? "照片排版无需注册；AI 聊天支持游客试用，手绘可免费试用 2 次。" : "Photo layouts need no account; AI Chat has a guest allowance; illustration offers two guest trials."}</li><li>{zh ? "照片排版在本地处理；聊天发送至 DeepSeek，手绘照片发送至百炼。" : "Photo layouts stay local; chats go to DeepSeek and illustration photos go to Bailian."}</li><li>{zh ? "下载后记得保存原始照片。" : "Keep your original photo after exporting."}</li></ul></section>
             <section><h2>{zh ? "一起完善工具站" : "Help shape the toolkit"}</h2><p>{zh ? "有想用的功能，或者遇到了问题？欢迎发邮件告诉我。" : "Have an idea or run into a problem? Send me a note."}</p><a className="directory-email" href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a></section>
           </aside>
         </div>

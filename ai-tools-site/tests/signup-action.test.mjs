@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import { authDestination } from '../src/lib/supabase/policy.ts';
 
 function action(signupResult) {
   const redirects = [];
@@ -10,7 +11,7 @@ function action(signupResult) {
   const context = { exports: {}, process: { env: {} }, require(name) {
     if (name === 'next/navigation') return { redirect(path) { redirects.push(path); throw new Error('NEXT_REDIRECT'); }, unstable_rethrow(error) { if (error.message === 'NEXT_REDIRECT') throw error; } };
     if (name === '@/lib/supabase/server') return { supabaseServer: async () => ({ auth: { signUp: async () => signupResult, resetPasswordForEmail: async () => ({ error: null }) } }) };
-    if (name === '@/lib/supabase/policy') return { validSiteUrl: () => 'http://localhost:3000' };
+    if (name === '@/lib/supabase/policy') return { authDestination, validSiteUrl: () => 'http://localhost:3000' };
     throw new Error('Unexpected import: ' + name);
   } };
   vm.runInNewContext(source, context);
@@ -18,10 +19,10 @@ function action(signupResult) {
   form.set('email', 'test@example.com'); form.set('password', 'abcdef'); form.set('confirmPassword', 'abcdef');
   return { run: (mode = 'signup') => context.exports.authenticate(mode, {}, form), redirects };
 }
-test('signup with a session redirects immediately to the account', async () => {
+test('signup with a session redirects immediately to the toolkit', async () => {
   const subject = action({ error: null, data: { session: { access_token: 'test-session' } } });
   await assert.rejects(subject.run(), /NEXT_REDIRECT/);
-  assert.deepEqual(subject.redirects, ['/account']);
+  assert.deepEqual(subject.redirects, ['/']);
 });
 test('signup without a session does not claim the user is logged in', async () => {
   const subject = action({ error: null, data: { session: null } });
@@ -30,9 +31,14 @@ test('signup without a session does not claim the user is logged in', async () =
   assert.equal(result.error, undefined);
   assert.deepEqual(subject.redirects, []);
 });
-test('signup errors do not redirect or claim success', async () => {
+test('duplicate signup directs the user to login or password recovery', async () => {
   const subject = action({ error: { code: 'user_already_exists' }, data: { session: null } });
-  assert.ok((await subject.run()).error);
+  assert.equal((await subject.run()).error, '此邮箱已注册。请返回登录，或通过「忘记密码」重置密码。');
+  assert.deepEqual(subject.redirects, []);
+});
+test('retryable auth errors show a connection error', async () => {
+  const subject = action({ error: { name: 'AuthRetryableFetchError' } });
+  assert.equal((await subject.run()).error, '暂时无法连接账户服务，请稍后重试。');
   assert.deepEqual(subject.redirects, []);
 });
 test('password recovery still sends reset email', async () => {

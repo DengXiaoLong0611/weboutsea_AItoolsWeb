@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
-import { validSiteUrl } from '../src/lib/supabase/policy.ts';
+import { authDestination, validSiteUrl } from '../src/lib/supabase/policy.ts';
 
 // Run the actual server action, replacing only navigation and the external auth SDK.
 const require = createRequire(import.meta.url);
@@ -19,7 +19,7 @@ function loadAction(auth) {
     require: id => {
       if (id === 'next/navigation') return { redirect, unstable_rethrow: error => { if (error.destination) throw error; } };
       if (id === '@/lib/supabase/server') return { supabaseServer: async () => ({ auth }) };
-      if (id === '@/lib/supabase/policy') return { validSiteUrl };
+      if (id === '@/lib/supabase/policy') return { authDestination, validSiteUrl };
       throw new Error(`Unexpected dependency ${id}`);
     },
   });
@@ -34,7 +34,7 @@ function signupForm() {
 }
 test('auto-confirm signup redirects immediately when Supabase returns a session', async () => {
   const authenticate = loadAction({ signUp: async () => ({ data: { session: { access_token: 'test-session' } }, error: null }) });
-  await assert.rejects(authenticate('signup', {}, signupForm()), error => error.destination === '/account');
+  await assert.rejects(authenticate('signup', {}, signupForm()), error => error.destination === '/');
 });
 
 test('signup and login return to the drawing studio but reject external return URLs', async () => {
@@ -47,7 +47,7 @@ test('signup and login return to the drawing studio but reject external return U
     form.set('next', '/tools/hand-drawn-photo/');
     await assert.rejects(authenticate(mode, {}, form), error => error.destination === '/tools/hand-drawn-photo/');
     form.set('next', '//evil.test');
-    await assert.rejects(authenticate(mode, {}, form), error => error.destination === '/account');
+    await assert.rejects(authenticate(mode, {}, form), error => error.destination === '/');
   }
 });
 test('signup requiring email confirmation still shows the verification instruction', async () => {

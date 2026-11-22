@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { isLibraryAdmin } from "@/lib/private-library";
+import { accountInitial } from "@/lib/account-avatar";
 import { signOut } from "@/app/auth/actions";
 async function AccountContent({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   await connection();
@@ -13,9 +14,9 @@ async function AccountContent({ searchParams }: { searchParams: Promise<{ error?
   if (error || !user) redirect("/auth/login");
   const query = await searchParams;
   return <main className="min-h-screen px-5 py-12"><section className="mx-auto max-w-xl rounded-2xl border border-[#223454] bg-[#101a2e] p-8">
-    <Link href="/" className="text-sm text-sky-300">← 返回工具站</Link><h1 className="mt-6 text-2xl font-semibold">我的账户</h1>
+    <Link href="/" className="text-sm text-sky-300">← 返回工具站</Link><div className="mt-8 flex items-center gap-4"><span aria-hidden="true" className="grid size-16 shrink-0 place-items-center rounded-full bg-sky-200 text-3xl font-semibold text-slate-900">{accountInitial(user.email)}</span><div><h1 className="text-2xl font-semibold">我的账户</h1><p className="mt-1 text-sm text-emerald-300">已登录</p></div></div>
     <p className="mt-5 text-sm text-slate-400">登录邮箱</p><p className="mt-2 break-all">{user.email}</p>
-    <p className="mt-5 text-sm text-slate-300">你已成功登录，可以返回工具站继续浏览。</p>
+
     {isLibraryAdmin(user.email) && <Link href="/admin/api-library" className="mt-6 block text-sky-300">私人 API 与提示词收藏库 →</Link>}
     <Link href="/auth/forgot-password" className="mt-6 inline-block text-sm text-sky-300">通过邮件重置密码</Link>
     {query.error && <p role="alert" className="mt-4 text-rose-300">退出未成功，请稍后重试。</p>}

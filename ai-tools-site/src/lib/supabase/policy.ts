@@ -1,5 +1,14 @@
 export function confirmationDestination(type: string | null): string | null {
-  return type === "signup" ? "/account" : type === "recovery" ? "/auth/update-password" : null;
+  return type === "signup" ? "/" : type === "recovery" ? "/auth/update-password" : null;
+}
+export function authDestination(value: unknown) {
+  switch (value) {
+    case "/tools/hand-drawn-photo/":
+    case "/admin/api-library":
+      return value;
+    default:
+      return "/";
+  }
 }
 export function validSiteUrl(value: string | undefined): string | null {
   try {

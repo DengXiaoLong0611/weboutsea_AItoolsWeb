@@ -1,7 +1,7 @@
 "use server";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import { validSiteUrl } from "@/lib/supabase/policy";
+import { authDestination, validSiteUrl } from "@/lib/supabase/policy";
 export type AuthState = { error?: string; message?: string };
 export async function authenticate(mode: string, _previous: AuthState, data: FormData): Promise<AuthState> {
   const supabase = await supabaseServer();
@@ -9,8 +9,7 @@ export async function authenticate(mode: string, _previous: AuthState, data: For
   if (!["login", "signup", "forgot-password", "update-password"].includes(mode)) return { error: "请求无效。" };
   const email = String(data.get("email") ?? "").trim();
   const password = String(data.get("password") ?? "");
-  // Only this known local destination is accepted from the browser.
-  const destination = data.get('next') === '/tools/hand-drawn-photo/' ? '/tools/hand-drawn-photo/' : '/account';
+  const destination = authDestination(data.get("next"));
   if (mode !== "update-password" && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254)) return { error: "请输入有效的邮箱地址。" };
   if (mode !== "forgot-password" && (!password || password.length > 128)) return { error: "请输入密码，最多 128 个字符。" };
   if (["signup", "update-password"].includes(mode)) {
@@ -28,18 +27,26 @@ export async function authenticate(mode: string, _previous: AuthState, data: For
         ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${origin}/auth/confirm` } })
         : await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/auth/confirm` });
       if (result.error) {
-        if (result.error.name === 'AuthRetryableFetchError') return { error: '无法连接 Supabase，请检查服务端网络或代理配置后重试。' };
-        const code = result.error.code;
+        const { code, status, name } = result.error;
+        console.warn("[auth] request failed", { mode, code, status, name });
+        if (name === 'AuthRetryableFetchError') return { error: '暂时无法连接账户服务，请稍后重试。' };
         const hints: Record<string, string> = {
+          user_already_exists: "此邮箱已注册。请返回登录，或通过「忘记密码」重置密码。",
+          email_exists: "此邮箱已注册。请返回登录，或通过「忘记密码」重置密码。",
           over_email_send_rate_limit: "验证邮件发送过于频繁，请稍后重试；管理员可在 Supabase 检查邮件额度。",
           over_request_rate_limit: "请求过于频繁，请稍后重试。",
           weak_password: "密码不符合 Supabase 的密码策略，请管理员检查 Authentication 中的最小长度和复杂度设置。",
           signup_disabled: "Supabase 项目尚未允许注册，请管理员开启邮箱注册。",
           email_provider_disabled: "Supabase 项目未开启邮箱登录，请管理员检查邮箱登录设置。",
           email_address_invalid: "邮箱格式不被账户服务接受，请检查后重试。",
+          email_address_not_authorized: "账户服务暂时无法向此邮箱发送邮件，请联系管理员。",
           unexpected_failure: "账户服务或验证邮件发送异常，请管理员查看 Supabase Auth 日志。",
         };
-        return { error: hints[code ?? ''] ?? (mode === "signup" ? "注册未成功。该邮箱可能已注册，或验证邮件暂时无法发送；请尝试登录或稍后重试。" : "暂时无法发送重置邮件，请稍后重试。") };
+        const hint = code && Object.hasOwn(hints, code) ? hints[code] : undefined;
+        const fallback = mode === "signup"
+          ? "注册未完成，请稍后重试。如果问题持续，请联系管理员并提供提交时间。"
+          : "暂时无法发送重置邮件，请稍后重试。";
+        return { error: hint ?? fallback };
       }
       // With Confirm email disabled, Supabase establishes the session during signup.
       if (mode === "signup" && result.data && "session" in result.data && result.data.session) redirect(destination);
