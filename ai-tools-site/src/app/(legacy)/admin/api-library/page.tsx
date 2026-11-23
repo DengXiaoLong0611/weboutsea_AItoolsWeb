@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { redirect, notFound } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
+import { savedPortraitPrompts } from "@/lib/pet-portrait/saved-prompts";
 import { cleanupPrompt, isLibraryAdmin, savedDrawingPrompts } from "@/lib/private-library";
 import { collectionUnlocked, unlockCollection } from "./unlock";
 export const metadata = { title: "私人 API 与提示词收藏库", robots: { index: false, follow: false } };
@@ -29,6 +30,28 @@ async function Library({ searchParams }: { searchParams: Promise<{ error?: strin
     <Link href="/account" className="text-sky-300">← 我的账户</Link>
     <header><p className="text-sm text-slate-400">私人管理区</p><h1 className="mt-2 text-3xl font-semibold">API 与提示词收藏库</h1><p className="mt-3 text-slate-300">收集模型供应商与可复用提示词，辅助选型和素材制作。</p></header>
     <section className="rounded-2xl border border-slate-700 p-6"><h2 className="text-xl font-semibold">净图助手｜短视频截图清理</h2><p className="mt-3 text-slate-300">提示词 · 图片编辑 · imagegen · 2026-10-25</p><p className="my-4 text-sm text-slate-400">上传原图后复制下方提示词。清理播放按钮、平台 UI 和叠加水印，保留主体及右上角照片对照。AI 补画可能改变细节；作者签名和版权标记应保留。</p><label htmlFor="cleanup-prompt" className="text-sm">完整提示词（选中即可复制）</label><textarea id="cleanup-prompt" readOnly value={cleanupPrompt} rows={22} className="mt-3 w-full rounded-xl border border-slate-600 bg-slate-950 p-4 text-sm leading-7"/><p className="mt-3 text-sm text-slate-400">通用复用版，不是某一次调用的逐字记录。普通照片可删除手绘及右上角对照要求。内置 imagegen 无法导出 API Key。</p></section>
+    <section id="pet-portrait-prompts" className="rounded-2xl border border-slate-700 p-6">
+      <h2 className="text-xl font-semibold">人宠合照 · 影棚拥抱</h2>
+      <p className="mt-3 text-slate-300">阿里云百炼 · qwen-image-2.1-pro · 多图参考生成</p>
+      <ol className="my-4 list-decimal space-y-2 pl-5 text-sm leading-7 text-slate-300">
+        <li>制作网页示范时，先用一张已有合照做参考，分别调用模型生成单独人像和单独宠物照。实际使用工具时，直接准备两张独立照片即可。</li>
+        <li>把人像放在参考图 1，宠物放在参考图 2，连同「影棚拥抱」提示词发给模型。提示词要求保留人和宠物的辨识特征，在同一场景内重新安排姿势、光线和透视。</li>
+        <li>生成流程每个场景请求一张图，参数为 <code>n: 1</code>、<code>prompt_extend: false</code>、<code>watermark: false</code>。网页会另外加上预览水印，并将预览和高清图保存到 Supabase 私有存储。</li>
+      </ol>
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-sky-300">
+        <a href="/tools/pet-portrait/guide-person.webp">查看示例人像</a>
+        <a href="/tools/pet-portrait/guide-pet.webp">查看示例宠物照</a>
+        <a href="/tools/pet-portrait/guide-result.webp">查看生成的合照</a>
+      </div>
+      <div className="mt-6 space-y-5">
+        {savedPortraitPrompts.map(({ id, title, prompt }) => (
+          <div key={id}>
+            <label htmlFor={`pet-portrait-prompt-${id}`} className="block text-sm font-medium">{title}</label>
+            <textarea id={`pet-portrait-prompt-${id}`} readOnly value={prompt} rows={id === "studio" ? 9 : 5} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-4 text-sm leading-7" />
+          </div>
+        ))}
+      </div>
+    </section>
     <section id="hand-drawn-prompts" className="rounded-2xl border border-slate-700 p-6">
       <h2 className="text-xl font-semibold">照片转手绘｜Q版油画棒与画风变体</h2>
       <p className="mt-3 text-slate-300">提示词 · 图片编辑 · 百炼 qwen-image-2.1-pro · 收藏于 2026-10-30</p>

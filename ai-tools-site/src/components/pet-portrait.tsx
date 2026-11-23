@@ -179,7 +179,27 @@ export default function PetPortrait({ locale }: { locale: 'en' | 'zh' }) {
     </header>
     <section className="portrait-hero">
       <div><h1>{t.title}</h1><p>{t.description}</p><a className="portrait-button" href="#studio">{t.start}</a><small>{t.free}</small></div>
-      <figure><Image src="/tools/pet-portrait/example.webp" alt={t.sample} width={1536} height={1024} priority /><figcaption>{t.sample}</figcaption></figure>
+      <div className="portrait-example" role="group" aria-label={t.exampleFlow}>
+        <div className="portrait-example-inputs">
+          <figure>
+            <Image src="/tools/pet-portrait/guide-person.webp" alt="" width={720} height={720} sizes="(max-width: 760px) 42vw, 180px" />
+            <figcaption>{t.person}</figcaption>
+          </figure>
+          <span className="portrait-example-plus" aria-hidden="true">+</span>
+          <figure>
+            <Image src="/tools/pet-portrait/guide-pet.webp" alt="" width={720} height={720} sizes="(max-width: 760px) 42vw, 180px" />
+            <figcaption>{t.pet}</figcaption>
+          </figure>
+        </div>
+        <div className="portrait-example-merge">
+          <span className="portrait-example-arrow" aria-hidden="true">➜</span>
+          <span>{t.merge}</span>
+        </div>
+        <figure className="portrait-example-result">
+          <Image src="/tools/pet-portrait/guide-result.webp" alt="" width={1200} height={1200} sizes="(max-width: 760px) 85vw, 400px" preload />
+          <figcaption>{t.sample}</figcaption>
+        </figure>
+      </div>
     </section>
     <section className="portrait-how"><h2>{t.how}</h2><ol>{t.steps.map(step => <li key={step}>{step}</li>)}</ol></section>
     <section className="portrait-studio" id="studio">

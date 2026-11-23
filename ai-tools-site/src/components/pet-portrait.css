@@ -5,3 +5,113 @@
 @media print{body:has(.portrait-print[open]) *{visibility:hidden}.portrait-dialog.portrait-print[open]{position:fixed;inset:0;max-width:none;max-height:none;width:100%;overflow:visible;border:0;margin:0;padding:0}.portrait-dialog.portrait-print[open] img{visibility:visible;max-height:92vh;width:100%;object-fit:contain}.portrait-dialog::backdrop{background:transparent}}
 .portrait-orders-inquiry,.portrait-print-options{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}.portrait-print-options label input{border:1px solid var(--pt-line);padding:.4rem;border-radius:6px}.portrait-dedication{flex-basis:100%;text-align:center;font:1.15rem Georgia,serif;overflow-wrap:anywhere}.portrait-dedication:empty{display:none}
 @media print{.portrait-dialog.portrait-print[open] img{max-height:85vh}.portrait-dialog.portrait-print[open] .portrait-dedication{visibility:visible}}
+
+.portrait-hero {
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: clamp(1.25rem, 4vw, 3rem);
+}
+
+.portrait-tool:lang(zh) h1 {
+  font-size: clamp(2.5rem, 4.5vw, 4rem);
+  text-wrap: balance;
+}
+
+.portrait-example {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 2.25fr);
+  align-items: center;
+  gap: clamp(.5rem, 1.6vw, 1.25rem);
+}
+
+.portrait-example-inputs {
+  display: grid;
+  gap: .5rem;
+  justify-items: center;
+}
+
+.portrait-example figure {
+  width: 100%;
+  padding: .45rem;
+  border: 1px solid var(--pt-line);
+  border-radius: 14px;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.portrait-example .portrait-example-result {
+  padding: .65rem;
+  border: 2px solid var(--pt-fill);
+  background: #e4efea;
+  box-shadow: 0 12px 26px #215e571c;
+}
+
+.portrait-example img {
+  border-radius: 8px;
+}
+
+.portrait-example figcaption {
+  margin: .4rem .15rem .15rem;
+  color: var(--pt-text);
+  font-weight: 750;
+}
+
+.portrait-example-plus,
+.portrait-example-arrow {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pt-fill);
+  color: #fff;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.portrait-example-plus {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.65rem;
+}
+
+.portrait-example-merge {
+  display: grid;
+  justify-items: center;
+  gap: .4rem;
+  text-align: center;
+  color: var(--pt-fill);
+  font-size: .85rem;
+  font-weight: 800;
+}
+
+.portrait-example-arrow {
+  width: clamp(2.5rem, 5vw, 4rem);
+  aspect-ratio: 1;
+  font-size: clamp(1.45rem, 3vw, 2.5rem);
+}
+
+@media (max-width: 900px) {
+  .portrait-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .portrait-example {
+    width: min(100%, 36rem);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .portrait-example {
+    grid-template-columns: 1fr;
+    width: min(100%, 23rem);
+  }
+
+  .portrait-example-inputs {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .portrait-example-arrow {
+    transform: rotate(90deg);
+  }
+}
