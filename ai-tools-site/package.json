@@ -10,16 +10,17 @@
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:smoke": "node tests/auth-smoke.mjs",
     "pet-photo:test": "node --experimental-strip-types scripts/test-pet-photo.mjs",
-    "docs:langgraph:build": "vitepress build langgraph-lightning/site"
+    "docs:langgraph:build": "vitepress build langgraph-lightning/site",
+    "pet-portrait:check": "node scripts/check-pet-portrait.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
-    "next": "16.4.3",
+    "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "undici": "^8.12.3",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "undici": "^8.12.3"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
@@ -27,7 +28,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.3",
+    "eslint-config-next": "16.4.6",
     "supabase": "3.2.0",
     "tailwindcss": "^4",
     "typescript": "^5",

@@ -6,6 +6,176 @@
 .portrait-orders-inquiry,.portrait-print-options{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}.portrait-print-options label input{border:1px solid var(--pt-line);padding:.4rem;border-radius:6px}.portrait-dedication{flex-basis:100%;text-align:center;font:1.15rem Georgia,serif;overflow-wrap:anywhere}.portrait-dedication:empty{display:none}
 @media print{.portrait-dialog.portrait-print[open] img{max-height:85vh}.portrait-dialog.portrait-print[open] .portrait-dedication{visibility:visible}}
 
+.portrait-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+  margin: 1rem 0;
+}
+
+.portrait-upload-slot {
+  min-width: 0;
+  min-height: 16rem;
+  display: grid;
+  align-content: start;
+  gap: .65rem;
+  padding: 1rem;
+  border: 1px dashed #93aaa2;
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.portrait-upload-slot.is-dragging {
+  border: 2px solid var(--pt-fill);
+  background: #eaf2ee;
+}
+
+.portrait-upload-slot p {
+  margin: 0;
+}
+
+.portrait-upload-preview {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.portrait-upload-preview img {
+  width: 7rem;
+  height: 8rem;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #edf1ee;
+}
+
+.portrait-upload-preview span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--pt-quiet);
+  font-size: .85rem;
+}
+
+.portrait-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: auto;
+}
+
+.portrait-upload-actions button,
+.portrait-upload-button {
+  padding: .55rem .75rem;
+  border: 1px solid var(--pt-line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--pt-text);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.portrait-upload-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.portrait-upload-error {
+  color: #912c26;
+  font-size: .88rem;
+}
+
+.portrait-upload-warning {
+  color: #73591d;
+  font-size: .88rem;
+}
+
+.portrait-look-select {
+  grid-column: 1 / -1;
+  display: grid;
+  max-width: 24rem;
+  gap: .5rem;
+}
+
+.portrait-confirm {
+  max-width: 42rem;
+  padding: 1.25rem;
+  border: 1px solid var(--pt-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.portrait-confirm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.portrait-confirm-grid figure {
+  margin: 0;
+}
+
+.portrait-confirm-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+.portrait-confirm-grid figcaption {
+  margin-top: .4rem;
+  color: var(--pt-quiet);
+}
+
+.portrait-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+
+.portrait-legal {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .9rem;
+  min-height: 2.6rem;
+  border-bottom: 1px solid var(--pt-line);
+  color: var(--pt-quiet);
+  font-size: .88rem;
+}
+
+.portrait-legal button {
+  border: 0;
+  background: transparent;
+  color: #912c26;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .portrait-upload-grid,
+  .portrait-confirm-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portrait-upload-slot {
+    min-height: 0;
+  }
+
+  .portrait-look-select {
+    grid-column: auto;
+  }
+}
+
 .portrait-hero {
   grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
   gap: clamp(1.25rem, 4vw, 3rem);
@@ -115,3 +285,13 @@
     transform: rotate(90deg);
   }
 }
+
+.portrait-filters { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+.portrait-filters label { display: grid; gap: .4rem; flex: 1 1 180px; }
+.portrait-filters select { width: 100%; padding: .65rem; border: 1px solid #ccc; border-radius: .5rem; background: white; color: #222; }
+.portrait-filters p { flex-basis: 100%; margin: 0; font-size: .9rem; }
+
+.portrait-recovery { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem 0; }
+.portrait-recovery label { display: grid; gap: .5rem; width: 100%; font-size: .9rem; }
+.portrait-recovery input { width: 100%; min-width: 0; padding: .65rem; border: 1px solid var(--pt-line); border-radius: .5rem; }
+.portrait-recovery button { text-decoration: underline; cursor: pointer; }

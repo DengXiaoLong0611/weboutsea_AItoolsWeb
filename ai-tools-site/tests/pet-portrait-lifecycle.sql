@@ -1,0 +1,63 @@
+-- Run after all portrait migrations in an isolated PostgreSQL database.
+begin;
+do $$
+declare
+  v uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  j uuid := 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  n integer;
+begin
+  select count(*) into n from public.create_pet_portrait_job(j,v,'studio','stable-key','reference','snapshot-v1',1,'test-model','{}',now()+interval '1 day',100);
+  if n<>1 then raise exception 'job not created'; end if;
+  select count(*) into n from public.create_pet_portrait_job(gen_random_uuid(),v,'studio','stable-key','reference','new-prompt',2,'new-model','{}',now()+interval '1 day',100);
+  if n<>1 or (select count(*) from public.pet_portrait_jobs where visitor=v)<>1 then raise exception 'idempotency broken'; end if;
+  if (select prompt from public.pet_portrait_jobs where id=j)<>'snapshot-v1' then raise exception 'snapshot overwritten'; end if;
+  select count(*) into n from public.create_pet_portrait_job(gen_random_uuid(),v,'coast','stable-key','reference','x',1,'m','{}',now()+interval '1 day',100);
+  if n<>0 then raise exception 'idempotency key reused for different scene'; end if;
+  select count(*) into n from public.claim_pet_portrait_job(j,v,100);
+  if n<>0 then raise exception 'incomplete uploads claimed'; end if;
+  update public.pet_portrait_jobs set status='queued' where id=j;
+  select count(*) into n from public.claim_pet_portrait_job(j,v,100);
+  if n<>1 then raise exception 'claim failed'; end if;
+  select count(*) into n from public.claim_pet_portrait_job(j,v,100);
+  if n<>0 then raise exception 'job claimed twice'; end if;
+  if (select count(*) from public.pet_portrait_provider_calls where visitor=v)<>1 then raise exception 'call budget recorded twice'; end if;
+  update public.pet_portrait_jobs set status='failed',error_code='generation_unknown' where id=j;
+  select count(*) into n from public.retry_pet_portrait_job(j,v);
+  if n<>0 then raise exception 'ambiguous paid call was retried'; end if;
+  update public.pet_portrait_jobs set error_code='provider_rejected' where id=j;
+  select count(*) into n from public.retry_pet_portrait_job(j,v);
+  if n<>1 then raise exception 'safe retry blocked'; end if;
+  select count(*) into n from public.claim_pet_portrait_job(j,v,1);
+  if n<>0 then raise exception 'retry bypassed daily budget'; end if;
+  update public.pet_portrait_jobs set provider_image_url='https://provider.example/result.jpg' where id=j;
+  select count(*) into n from public.claim_pet_portrait_job(j,v,1);
+  if n<>1 then raise exception 'delivery-only retry blocked by model budget'; end if;
+  if (select count(*) from public.pet_portrait_provider_calls where visitor=v)<>1 then raise exception 'delivery charged as generation'; end if;
+
+  perform public.settle_pet_portrait_payment('cs_test_one',v,array['studio'],1300,'pi_one');
+  if (select count(*) from public.paid_pet_portrait_scenes(v))<>1 then raise exception 'paid entitlement missing'; end if;
+  insert into public.pet_portrait_refunds(payment_intent,amount_refunded) values('pi_one',1300);
+  if (select count(*) from public.paid_pet_portrait_scenes(v))<>0 then raise exception 'refund retained download'; end if;
+  perform public.settle_pet_portrait_payment('cs_test_one',v,array['studio'],1300,'pi_one');
+  if (select count(*) from public.paid_pet_portrait_scenes(v))<>0 then raise exception 'replayed webhook restored refund'; end if;
+  insert into public.pet_portrait_refunds(payment_intent,amount_refunded) values('pi_early',2000);
+  perform public.settle_pet_portrait_payment('cs_test_early',v,array['studio','coast'],2000,'pi_early');
+  if (select count(*) from public.paid_pet_portrait_scenes(v))<>0 then raise exception 'early refund ignored'; end if;
+  perform public.settle_pet_portrait_payment('cs_test_two',v,array['studio'],1300,'pi_two');
+  if (select count(*) from public.paid_pet_portrait_scenes(v))<>1 then raise exception 'unrelated order revoked'; end if;
+  insert into public.pet_portrait_recovery_links(token_hash,visitor,expires_at) values('hashed-token',v,now()+interval '7 days');
+  if (select count(*) from public.restore_pet_portrait_gallery('hashed-token'))<>1 then raise exception 'paid recovery denied'; end if;
+  if exists(select 1 from public.restore_pet_portrait_gallery('wrong-token')) then raise exception 'invalid token accepted'; end if;
+  update public.pet_portrait_recovery_links set expires_at=now()-interval '1 second' where visitor=v;
+  if exists(select 1 from public.restore_pet_portrait_gallery('hashed-token')) then raise exception 'expired recovery accepted'; end if;
+  update public.pet_portrait_recovery_links set expires_at=now()+interval '7 days' where visitor=v;
+  insert into public.pet_portrait_deleted_visitors(visitor) values(v);
+  if exists(select 1 from public.restore_pet_portrait_gallery('hashed-token')) then raise exception 'deleted recovery accepted'; end if;
+  if (select count(*) from public.paid_pet_portrait_scenes(v))<>0 then raise exception 'deleted visitor retained access'; end if;
+  perform public.settle_pet_portrait_payment('cs_test_deleted',v,array['home'],1300,'pi_deleted');
+  if exists(select 1 from public.pet_portrait_receipts where checkout_id='cs_test_deleted') then raise exception 'webhook recreated deleted data'; end if;
+  select count(*) into n from public.create_pet_portrait_job(gen_random_uuid(),v,'home','deleted-key','ref','prompt',1,'m','{}',now()+interval '1 day',100);
+  if n<>0 then raise exception 'deleted visitor created job'; end if;
+end;
+$$;
+rollback;
