@@ -72,6 +72,10 @@ git push
 
 已确认使用 Vercel，采用 GitHub 仓库导入与持续部署流程。
 
+当前线上访问地址：
+
+- https://weboutsea-a-itools-web.vercel.app/zh
+
 1. 上传 GitHub 后，在 Vercel 中导入对应仓库。
 2. **Root Directory 设为 `ai-tools-site`**，框架选择 Next.js。
 3. 安装命令 `npm ci`，构建命令 `npm run build`，输出目录保留平台默认值；不要填 `out`。

@@ -1,0 +1,242 @@
+.look-gallery {
+  --look-ink: #203637;
+  --look-muted: #607270;
+  --look-line: #d7e0da;
+  --look-accent: #28665e;
+  min-height: 100vh;
+  padding: clamp(1.25rem, 4vw, 3.5rem) clamp(1rem, 4vw, 3.5rem) 5rem;
+  background: #f5f7f4;
+  color: var(--look-ink);
+}
+
+.look-gallery-header {
+  max-width: 1440px;
+  margin-inline: auto;
+  margin-bottom: 2rem;
+}
+
+.look-gallery-header > * {
+  max-width: 760px;
+}
+
+.look-gallery-back {
+  color: var(--look-muted);
+  text-decoration: none;
+}
+
+.look-gallery-back:hover {
+  color: var(--look-accent);
+}
+
+.look-gallery-eyebrow {
+  margin: 2.5rem 0 .65rem;
+  color: var(--look-accent);
+  font-size: .75rem;
+  font-weight: 750;
+  letter-spacing: .14em;
+}
+
+.look-gallery-header h1 {
+  margin: 0;
+  font: 400 clamp(2.4rem, 5vw, 4.5rem)/1.08 Georgia, "Noto Serif", serif;
+  letter-spacing: -.035em;
+}
+
+.look-gallery-intro {
+  max-width: 52ch;
+  margin: 1rem 0 0;
+  color: var(--look-muted);
+  font-size: 1.05rem;
+}
+
+.look-gallery-controls {
+  max-width: 1440px;
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: grid;
+  gap: .85rem;
+  margin: 0 auto 1.5rem;
+  padding: .9rem 0;
+  border-block: 1px solid var(--look-line);
+  background: rgb(245 247 244 / 95%);
+  backdrop-filter: blur(12px);
+}
+
+.look-gallery-filter-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem 1rem;
+}
+
+.look-gallery-filter-group > span {
+  min-width: 3.5rem;
+  color: var(--look-muted);
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.look-gallery-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.look-gallery-chips button {
+  min-height: 2.35rem;
+  padding: .4rem .8rem;
+  border: 1px solid var(--look-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--look-ink);
+  font: inherit;
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+.look-gallery-chips button[aria-pressed="true"] {
+  border-color: var(--look-accent);
+  background: var(--look-accent);
+  color: #fff;
+}
+
+.look-gallery-chips button:focus-visible,
+.look-card:focus-visible {
+  outline: 3px solid #b64e31;
+  outline-offset: 3px;
+}
+
+.look-gallery-count {
+  margin: 0;
+  color: var(--look-muted);
+  font-size: .85rem;
+}
+
+.look-gallery-grid {
+  max-width: 1440px;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8rem;
+}
+
+.look-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--look-line);
+  border-radius: 12px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.look-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgb(32 54 55 / 12%);
+}
+
+.look-card-image {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(145deg, #e5e9e1, #d5dfd8 52%, #e9e0d4);
+}
+
+.look-card-image img {
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+
+.look-card:hover .look-card-image img {
+  transform: scale(1.035);
+}
+
+.look-card-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: rgb(32 54 55 / 32%);
+  font-size: 2rem;
+}
+
+.look-card-subject {
+  position: absolute;
+  right: .55rem;
+  bottom: .55rem;
+  padding: .28rem .55rem;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 88%);
+  color: var(--look-ink);
+  font-size: .72rem;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+
+.look-card-copy {
+  display: grid;
+  gap: .35rem;
+  padding: .75rem;
+}
+
+.look-card-category {
+  color: var(--look-muted);
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.look-card-copy h2 {
+  margin: 0;
+  font: 600 1rem/1.3 system-ui, sans-serif;
+}
+
+.look-card-action {
+  margin-top: .2rem;
+  color: var(--look-accent);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+@media (min-width: 600px) {
+  .look-gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .look-card-copy {
+    padding: .9rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .look-gallery-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+
+  .look-gallery-controls {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .look-gallery-count {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+@media (min-width: 1250px) {
+  .look-gallery-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .look-card,
+  .look-card-image img {
+    transition: none;
+  }
+}

@@ -10,6 +10,7 @@
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:smoke": "node tests/auth-smoke.mjs",
     "pet-photo:test": "node --experimental-strip-types scripts/test-pet-photo.mjs",
+    "pet-portrait:previews": "node --experimental-strip-types scripts/generate-pet-portrait-previews.mjs",
     "docs:langgraph:build": "vitepress build langgraph-lightning/site",
     "pet-portrait:check": "node scripts/check-pet-portrait.mjs"
   },

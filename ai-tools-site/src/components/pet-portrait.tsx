@@ -50,10 +50,13 @@ async function preparePhoto(file: File) {
   } finally { bitmap.close(); }
 }
 
+type ProgressStage = 'preparing' | 'uploading' | 'retrying' | 'queued' | 'processing' | 'loading';
+
 type Job = { id: string; scene: Scene; status: 'uploading' | 'queued' | 'processing' | 'completed' | 'failed'; retryCount: number; errorCode?: string; canRetry?: boolean };
 
 export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 'zh'; mode?: 'main' | 'looks' | 'photos' }) {
   const language = useSyncExternalStore(subscribeToNavigation, getExtraLanguage, serverExtraLanguage) || locale;
+  const [shareFeedback, setShareFeedback] = useState<{ manualUrl: string }>();
   const [draftReady, setDraftReady] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [monitoring, setMonitoring] = useState(false);
@@ -66,6 +69,7 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
   const [category, setCategory] = useState<PortraitCategory | 'all'>('all');
   const [started, setStarted] = useState<number>();
   const [elapsed, setElapsed] = useState(0);
+  const [progressStage, setProgressStage] = useState<ProgressStage>();
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [error, setError] = useState('');
   const [modal, setModal] = useState<{ scene: Scene; print: boolean }>();
@@ -232,6 +236,17 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
     }
   }
 
+  async function copyShareLink() {
+    const url = new URL(`/${locale}/tools/pet-portrait`, window.location.origin);
+    if (language === 'es' || language === 'fr') url.searchParams.set('lang', language);
+    try {
+      await navigator.clipboard.writeText(url.href);
+      setShareFeedback({ manualUrl: '' });
+    } catch {
+      setShareFeedback({ manualUrl: url.href });
+    }
+  }
+
   function changeLanguage(value: PortraitLanguage) {
     if (value === 'en' || value === 'zh') {
       if (value !== locale || window.location.search) {
@@ -250,6 +265,7 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
 
   function continueToConfirm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!gallery || processing || !draftReady) return;
     if ((needsPerson && !personFile) || !petFile) {
       setPhotoErrors({
         person: !needsPerson || personFile ? '' : t.missingPerson,
@@ -266,6 +282,7 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
     while (Date.now() < deadline) {
       const { job } = await request<{ job: Job }>(api + '?action=job&job=' + encodeURIComponent(jobId), { cache: 'no-store' });
       if (job.status === 'completed' || job.status === 'failed') return job;
+      setProgressStage(job.status);
       await new Promise(resolve => window.setTimeout(resolve, 1500));
     }
     throw new Error('stillProcessing');
@@ -276,16 +293,18 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
     setError('');
     setElapsed(0);
     setStarted(Date.now());
+    setProgressStage('preparing');
     try {
       const [person, pet] = await Promise.all([needsPerson && personFile ? preparePhoto(personFile) : undefined, preparePhoto(petFile)]);
       const queue = previewQueue(first, gallery.scenes);
       for (const scene of queue) {
+        setProgressStage('uploading');
         const payload = new FormData();
         if (referenceRoles(scene).includes('person') && person) payload.append('person', person, 'person.jpg');
         payload.append('pet', pet, 'pet.jpg');
         payload.append('scene', scene);
         const idempotencyKey = crypto.randomUUID();
-        const { job } = await request<{ job: { id: string; status: string } }>(
+        const { job } = await request<{ job: Job }>(
           api + '?action=job',
           {
             method: 'POST',
@@ -294,6 +313,7 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
             signal: AbortSignal.timeout(30_000),
           },
         );
+        setProgressStage(job.status === 'completed' || job.status === 'failed' ? 'loading' : job.status);
         setMonitoring(true);
         const completed = await pollJob(job.id);
         if (completed.status === 'failed') {
@@ -312,6 +332,7 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
       try { setGallery(await request<Gallery>(api)); } catch { /* Keep the previews already displayed. */ }
     } finally {
       setStarted(undefined);
+      setProgressStage(undefined);
       setConfirming(false);
     }
   }
@@ -380,8 +401,9 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
     setError('');
     setElapsed(0);
     setStarted(Date.now());
+    setProgressStage('retrying');
     try {
-      const { job } = await request<{ job: { id: string; status: string } }>(api + '?action=retry', {
+      const { job } = await request<{ job: Job }>(api + '?action=retry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId: failedJobId }),
@@ -393,15 +415,22 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
         throw new Error(completed.canRetry ? 'generation' : 'reviewRequired');
       }
       setFailedJobId('');
+      setProgressStage('loading');
       setGallery(await request<Gallery>(api));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'generation');
     } finally {
       setStarted(undefined);
+      setProgressStage(undefined);
     }
   }
 
   const processing = started !== undefined || monitoring;
+  const monitoredStage = jobs.some(job => job.status === 'processing') ? 'processing'
+    : jobs.some(job => job.status === 'queued') ? 'queued'
+    : jobs.some(job => job.status === 'uploading') ? 'uploading'
+    : 'loading';
+  const completedPreviews = gallery?.scenes.length ?? 0;
   const translatedError = Object.hasOwn(t, error) ? t[error as keyof typeof t] : undefined;
   const message = typeof translatedError === 'string' ? translatedError : processing ? '' : t.generation;
 
@@ -424,7 +453,19 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
       {recoveryLink && <label>{t.recoveryNotice}<input readOnly value={recoveryLink} onFocus={event => event.target.select()} /></label>}
     </section>}
     {mode === 'main' && <section className="portrait-hero">
-      <div><h1>{t.title}</h1><p>{t.description}</p><a className="portrait-button" href="#studio">{t.start}</a><small>{t.free}</small></div>
+      <div>
+        <h1>{t.title}</h1>
+        <p>{t.description}</p>
+        <div className="portrait-hero-actions">
+          <a className="portrait-button" href="#studio">{t.start}</a>
+          <button type="button" className="portrait-button secondary" onClick={() => void copyShareLink()}>{t.copyLink}</button>
+        </div>
+        <div role="status">
+          {shareFeedback && <small>{shareFeedback.manualUrl ? t.copyManually : t.linkCopied}</small>}
+        </div>
+        {shareFeedback?.manualUrl && <input className="portrait-share-url" aria-label={t.copyLink} readOnly value={shareFeedback.manualUrl} onFocus={event => event.target.select()} />}
+        <small>{t.free}</small>
+      </div>
       <div className="portrait-example" role="group" aria-label={t.exampleFlow}>
         <div className="portrait-example-inputs">
           <figure>
@@ -451,7 +492,7 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
     <section className="portrait-studio" id="studio">
       {(!gallery || gallery.scenes.length < previewLimit) && !confirming && <form onSubmit={continueToConfirm}>
         <h2>{t.form}</h2>
-        <fieldset disabled={processing || !gallery || !draftReady}>
+        <fieldset disabled={processing || !draftReady}>
           <div className="portrait-filters">
             <label>{t.subjectsLabel}<select value={subjects} onChange={event => changeFilters(event.target.value as PortraitSubjects, category)}>
               <option value="person-pet">{t.personPetLabel} · 90</option>
@@ -496,8 +537,11 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
             <label className="portrait-look-select">{t.look}<select value={first} onChange={event => setFirst(event.target.value as Scene)}>
               {visibleScenes.map(scene => <option key={scene} value={scene}>{name(scene)}</option>)}
             </select></label>
+            <Link href={`/${locale}/tools/pet-portrait/looks`}>
+              {language === 'zh' ? '浏览全部风格 →' : 'Browse all looks →'}
+            </Link>
           </div>
-          <p>{t.consent}</p><button className="portrait-button" disabled={(needsPerson && !personFile) || !petFile}>{t.continue}</button>
+          <p>{t.consent}</p><button className="portrait-button" disabled={!gallery || (needsPerson && !personFile) || !petFile}>{t.continue}</button>
         </fieldset>
       </form>}
       {confirming && !processing && <section className="portrait-confirm" aria-labelledby="portrait-confirm-title">
@@ -514,8 +558,17 @@ export default function PetPortrait({ locale, mode = 'main' }: { locale: 'en' | 
           <button type="button" className="portrait-button" disabled={processing} onClick={() => void generate()}>{t.startGeneration}</button>
         </div>
       </section>}
-      {processing && <div className="portrait-progress"><span role="status">{t.waiting} · {gallery?.scenes.length ?? 0}/3</span>
-        <progress aria-label={t.waiting} />{started !== undefined && <span aria-hidden="true">{elapsed}s</span>}{elapsed >= 45 && <p>{t.long}</p>}
+      {processing && <div className="portrait-progress">
+        <div className="portrait-progress-header">
+          <span role="status">{t.progress[progressStage ?? monitoredStage]} · {completedPreviews}/{previewLimit}</span>
+          {started !== undefined && <span aria-hidden="true">{elapsed}s</span>}
+        </div>
+        <div className="portrait-progress-track" aria-hidden="true">
+          {Array.from({ length: previewLimit }, (_, index) => (
+            <span key={index} data-state={index < completedPreviews ? 'complete' : index === completedPreviews ? 'active' : 'pending'} />
+          ))}
+        </div>
+        {started !== undefined && elapsed >= 45 && <p>{t.long}</p>}
       </div>}
       {jobs.some(job => job.status === 'failed' && !job.canRetry) && !processing && <p role="status">{t.reviewRequired}</p>}
       {error && <p role="alert" className="portrait-error">{message}</p>}
