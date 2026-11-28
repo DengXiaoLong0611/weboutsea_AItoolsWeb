@@ -12,7 +12,7 @@ const errors: Record<string, [string, string]> = {
   sign_in_required: ["Sign in to start chatting. After signing in, return to this tab and retry.", "请先登录，登录后回到此标签页重试即可。"],
   guest_trial_exhausted: ["Today's 20 guest replies are used up. Sign in for your account allowance, or return tomorrow.", "今日游客免费 20 次已用完。注册或登录使用账号额度，或明天再来。"],
   daily_quota_exhausted: ["Today's 20 free replies are used up. Your allowance resets at 00:00 UTC.", "今日免费 20 次已用完，将在 UTC 零点恢复。"],
-  trial_unavailable: ["Guest chat is temporarily unavailable. Please try again later.", "游客聊天暂时不可用，请稍后再试。"],
+  trial_unavailable: ["The chat quota service is temporarily unavailable. Please try again later.", "聊天额度服务暂时不可用，请稍后再试。"],
   trial_busy: ["A reply is still being generated. Please wait and try again.", "上一条回复正在生成，请稍后再试。"],
   not_configured: ["Chat is not connected yet. The site owner needs to configure the DeepSeek API key.", "聊天服务尚未接通，请站点管理员配置 DeepSeek API 密钥。"],
   rate_limited: ["You’re sending messages too quickly. Please wait a minute.", "发送太频繁，请等待一分钟后重试。"],

@@ -99,11 +99,11 @@ docker compose up -d --build
 - 百炼服务端调用代码与本地三组手绘测试入口已准备好（已接入手绘网页）：配置 `DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`DASHSCOPE_IMAGE_MODEL`；运行 `npm run pet-photo:test` 仅预览，加 `-- --run` 才实际生成。详见 [百炼宠物手绘配置](../docs/百炼宠物手绘配置.md)。未新增 SDK 依赖。
 - Vercel 的 Root Directory 使用 `ai-tools-site`，现有 GitHub 集成会随 main 更新自动部署。绑定自有域名时以 Vercel Domains 给出的 DNS 记录为准。
 
-## 身份认证与私人收藏库
+## 身份认证与个人收藏库
 
 注册、登录、邮箱验证、找回密码、账户和退出流程已实现。本地 Supabase 项目参数已填写，但生产配置与真实邮件全流程仍需验收；本地配置文件不提交仓库。配置步骤见 [Supabase 登录配置](../docs/Supabase登录配置.md)。
 
-`/admin/api-library` 仅允许已登录且邮箱位于 `PRIVATE_LIBRARY_ADMIN_EMAILS` 的用户访问；白名单为空时全部拒绝。该页收集提示词和供应商链接，不提供密钥管理或编辑数据库。详见 [私人收藏库配置](../docs/私人收藏库配置.md)。
+`/admin/api-library` 公开展示提示词和供应商链接，访客可直接访问。公开笔记发布仍使用服务端管理员邮箱白名单。
 
 ## 语言路由
 

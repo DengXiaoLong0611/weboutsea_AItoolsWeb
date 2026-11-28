@@ -32,4 +32,4 @@ export async function proxy(request: NextRequest) {
   await supabase.auth.getUser();
   return response;
 }
-export const config = { matcher: ["/", "/en", "/zh", "/auth/:path*", "/account/:path*", "/admin/:path*", "/notes"] };
+export const config = { matcher: ["/", "/en", "/zh", "/auth/:path*", "/account/:path*", "/notes"] };

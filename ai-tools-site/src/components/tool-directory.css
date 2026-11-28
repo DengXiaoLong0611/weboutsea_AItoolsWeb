@@ -36,7 +36,7 @@
 .directory-checkbox input{accent-color:#b94427;width:15px;height:15px}
 .directory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .directory-tool{background:#fff;border:1px solid #dde1e5;border-radius:5px;display:flex;flex-direction:column;min-width:0}
-.directory-tool-ready{grid-column:span 2}
+.directory-tool-ready{grid-column:auto}
 .directory-tool-photo{position:relative;display:block;background:#e9e7df;overflow:hidden;border-radius:4px 4px 0 0}
 .directory-tool-photo img{width:100%;height:220px;object-fit:cover;object-position:center 52%;transition:transform .25s ease-out}
 .directory-tool-photo:hover img{transform:scale(1.025)}
@@ -103,4 +103,79 @@
   background: #bae6fd;
   color: #0f172a;
   font-weight: 600;
+}
+
+/* 工具目录：紧凑卡片 */
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* 每张卡片只占一列，图片和文字上下排列 */
+.directory-tool-ready {
+  grid-column: auto;
+  flex-direction: column;
+}
+
+/* 覆盖原来桌面端图片占宽 43% 的设置 */
+.directory-tool-photo {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+}
+
+.directory-tool-photo img {
+  display: block;
+  height: 140px;
+  min-height: 0;
+  object-fit: cover;
+}
+
+/* 缩小卡片内边距 */
+.directory-tool-content {
+  padding: 12px;
+}
+
+.directory-tool-meta {
+  margin-bottom: 8px;
+}
+
+.directory-tool h3 {
+  font-size: 16px;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.directory-tool p {
+  font-size: 13px;
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+.directory-tool-tags {
+  gap: 4px 8px;
+  padding-bottom: 10px;
+}
+
+.directory-tool-bottom {
+  padding-top: 8px;
+  gap: 6px;
+}
+
+.directory-tool-bottom > a {
+  font-size: 12px;
+}
+
+/* 中等屏幕：每行两张 */
+@media (max-width: 1100px) {
+  .directory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 手机：每行一张，避免文字过度拥挤 */
+@media (max-width: 600px) {
+  .directory-grid {
+    grid-template-columns: 1fr;
+  }
 }

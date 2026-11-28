@@ -3,7 +3,6 @@ import { connection } from "next/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import { isLibraryAdmin } from "@/lib/private-library";
 import { accountInitial } from "@/lib/account-avatar";
 import { signOut } from "@/app/auth/actions";
 async function AccountContent({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -17,7 +16,7 @@ async function AccountContent({ searchParams }: { searchParams: Promise<{ error?
     <Link href="/" className="text-sm text-sky-300">← 返回工具站</Link><div className="mt-8 flex items-center gap-4"><span aria-hidden="true" className="grid size-16 shrink-0 place-items-center rounded-full bg-sky-200 text-3xl font-semibold text-slate-900">{accountInitial(user.email)}</span><div><h1 className="text-2xl font-semibold">我的账户</h1><p className="mt-1 text-sm text-emerald-300">已登录</p></div></div>
     <p className="mt-5 text-sm text-slate-400">登录邮箱</p><p className="mt-2 break-all">{user.email}</p>
 
-    {isLibraryAdmin(user.email) && <Link href="/admin/api-library" className="mt-6 block text-sky-300">私人 API 与提示词收藏库 →</Link>}
+    <Link href="/admin/api-library" className="mt-6 block text-sky-300">个人收藏库 →</Link>
     <Link href="/auth/forgot-password" className="mt-6 inline-block text-sm text-sky-300">通过邮件重置密码</Link>
     {query.error && <p role="alert" className="mt-4 text-rose-300">退出未成功，请稍后重试。</p>}
     <form action={signOut} className="mt-6"><button className="rounded-xl border border-slate-500 px-5 py-2 text-sm hover:bg-slate-800">退出登录</button></form>
